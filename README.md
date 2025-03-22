@@ -1,6 +1,6 @@
-# Synthesizer
+# WaveCrafter
 
-A modern synthesizer with a graphical user interface (GUI) for real-time sound generation and control.
+WaveCrafter is a high-grade application for crafting and visualizing sound waves with a modern graphical user interface (GUI) for real-time sound generation and control.
 
 ## Features
 - **Real-time waveform rendering**: Visualize the waveform as you adjust parameters.
@@ -22,7 +22,7 @@ The following crates are used in this project:
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd tempest.dev
+   cd wave.crafter
    ```
 
 2. Build the project:
@@ -50,9 +50,6 @@ The following crates are used in this project:
   - `Z`, `X`, `C`, `V`, `B`, `N`, `M`: Play notes in the current octave.
   - `A`, `S`, `D`, `F`, `G`, `H`, `J`: Play sharp/flat notes.
   - `,` and `.`: Shift the octave down or up.
-
-## Screenshots
-![Synthesizer GUI](https://via.placeholder.com/800x400.png?text=Synthesizer+GUI+Preview)
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.
