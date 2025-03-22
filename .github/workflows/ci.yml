@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfontconfig1-dev libglib2.0-dev # Install required system dependencies
+          sudo apt-get install -y libfontconfig1-dev libglib2.0-dev libcairo2-dev # Install required system dependencies
 
       - name: Set up Rust
         uses: actions-rs/toolchain@v1 # Set up the Rust toolchain
