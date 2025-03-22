@@ -1,7 +1,6 @@
 use eframe::egui;
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::{Synthesizer, Waveform};
-use rfd::FileDialog;
 use std::thread;
 
 pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
@@ -38,7 +37,7 @@ impl eframe::App for WaveCrafterApp {
             ui.horizontal(|ui| {
                 ui.label("Frequency (Hz):");
                 let mut freq = synth.frequency_left;
-                if ui.add(egui::Slider::new(&mut freq, 20.0..=20000.0)).changed() {
+                if ui.add(egui::Slider::new(&mut freq, 20.0..=2000.0)).changed() {
                     synth.set_binaural_frequencies(freq, freq);
                 }
             });
@@ -71,41 +70,53 @@ impl eframe::App for WaveCrafterApp {
 
             ui.separator();
 
-            // Spectrogram Placeholder
-            ui.label("Spectrogram (Coming Soon)");
+            // Track Management
+            ui.heading("Tracks");
+            if ui.button("Add Track").clicked() {
+                println!("Adding a new track...");
+                synth.add_track("New Track");
+            }
+
+            for track in &synth.tracks {
+                ui.horizontal(|ui| {
+                    ui.label(&track.id);
+                    let mut volume = track.volume;
+                    if ui.add(egui::Slider::new(&mut volume, 0.0..=1.0)).changed() {
+                        println!("Volume for {} set to {}", track.id, volume);
+                    }
+                    if ui.button("Mute").clicked() {
+                        println!("Muted {}", track.id);
+                    }
+                });
+            }
+
+            ui.separator();
+
+            // Effects
+            ui.heading("Effects");
+            ui.horizontal(|ui| {
+                ui.label("Reverb:");
+                let mut reverb = synth.effects.reverb;
+                if ui.add(egui::Slider::new(&mut reverb, 0.0..=100.0)).changed() {
+                    synth.set_effect("reverb", reverb);
+                }
+            });
+            ui.horizontal(|ui| {
+                ui.label("Delay:");
+                let mut delay = synth.effects.delay;
+                if ui.add(egui::Slider::new(&mut delay, 0.0..=100.0)).changed() {
+                    synth.set_effect("delay", delay);
+                }
+            });
+
+            ui.separator();
 
             // Export Button
             if ui.button("💾 Export Audio").clicked() {
-                if let Some(path) = FileDialog::new()
-                    .add_filter("WAV", &["wav"])
-                    .add_filter("MP3", &["mp3"])
-                    .add_filter("FLAC", &["flac"])
-                    .set_title("Export Audio")
-                    .save_file()
-                {
-                    let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
-                    match extension {
-                        "wav" => {
-                            if let Err(e) = synth.export_to_wav(5.0, path.to_str().unwrap()) {
-                                eprintln!("Failed to export WAV: {}", e);
-                            }
-                        }
-                        "mp3" => {
-                            println!("MP3 export is not implemented yet.");
-                            // Add MP3 export logic here
-                        }
-                        "flac" => {
-                            println!("FLAC export is not implemented yet.");
-                            // Add FLAC export logic here
-                        }
-                        _ => eprintln!("Unsupported file format."),
-                    }
+                println!("Exporting audio...");
+                if let Err(e) = synth.export_to_wav(5.0, "output.wav") {
+                    eprintln!("Failed to export audio: {}", e);
                 }
-            }
-
-            // Lock Spectrogram Button
-            if ui.button("🔒 Lock Spectrogram").clicked() {
-                println!("Spectrogram interaction locked.");
             }
         });
     }

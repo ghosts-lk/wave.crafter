@@ -55,6 +55,49 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('No recording available to export.');
         }
     });
+
+    const addTrackButton = document.getElementById('add-track');
+    const tracksContainer = document.getElementById('tracks');
+    const timelineCanvas = document.getElementById('timeline');
+    const reverbSlider = document.getElementById('reverb');
+    const delaySlider = document.getElementById('delay');
+
+    let tracks = [];
+
+    addTrackButton.addEventListener('click', () => {
+        const trackId = `track-${tracks.length + 1}`;
+        tracks.push(trackId);
+        const trackElement = document.createElement('div');
+        trackElement.id = trackId;
+        trackElement.innerHTML = `
+            <label>${trackId}</label>
+            <input type="range" min="0" max="1" step="0.01" value="0.5" class="volume-slider">
+            <button class="mute-button">Mute</button>
+        `;
+        tracksContainer.appendChild(trackElement);
+
+        // Communicate with backend to add a new track
+        ipcRenderer.send('add-track', { id: trackId });
+    });
+
+    reverbSlider.addEventListener('input', (e) => {
+        ipcRenderer.send('set-effect', { effect: 'reverb', value: e.target.value });
+    });
+
+    delaySlider.addEventListener('input', (e) => {
+        ipcRenderer.send('set-effect', { effect: 'delay', value: e.target.value });
+    });
+
+    // Timeline rendering
+    function renderTimeline() {
+        const ctx = timelineCanvas.getContext('2d');
+        ctx.clearRect(0, 0, timelineCanvas.width, timelineCanvas.height);
+        ctx.fillStyle = '#ccc';
+        ctx.fillRect(0, 0, timelineCanvas.width, timelineCanvas.height);
+        // Add more rendering logic for tracks and markers
+    }
+
+    setInterval(renderTimeline, 100);
 });
 
 function renderSpectrogram(canvas, data) {

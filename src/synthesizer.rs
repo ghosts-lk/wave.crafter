@@ -14,6 +14,19 @@ pub struct Synthesizer {
     pub frequency_right: f32, // Added for binaural audio
     pub amplitude: f32,
     pub waveform: Waveform,
+    pub tracks: Vec<Track>, // Added for track management
+    pub effects: Effects,  // Added for effects
+}
+
+pub struct Track {
+    pub id: String,
+    pub volume: f32,
+    pub muted: bool,
+}
+
+pub struct Effects {
+    pub reverb: f32,
+    pub delay: f32,
 }
 
 impl Synthesizer {
@@ -23,6 +36,8 @@ impl Synthesizer {
             frequency_right: frequency, // Default to same frequency for both channels
             amplitude,
             waveform,
+            tracks: Vec::new(), // Initialize tracks
+            effects: Effects { reverb: 0.0, delay: 0.0 }, // Initialize effects
         }
     }
 
@@ -52,6 +67,22 @@ impl Synthesizer {
     pub fn set_binaural_frequencies(&mut self, left: f32, right: f32) {
         self.frequency_left = left;
         self.frequency_right = right;
+    }
+
+    pub fn add_track(&mut self, id: &str) {
+        self.tracks.push(Track {
+            id: id.to_string(),
+            volume: 0.5,
+            muted: false,
+        });
+    }
+
+    pub fn set_effect(&mut self, effect: &str, value: f32) {
+        match effect {
+            "reverb" => self.effects.reverb = value,
+            "delay" => self.effects.delay = value,
+            _ => println!("Unknown effect: {}", effect),
+        }
     }
 
     pub fn export_to_wav(&self, duration: f32, filename: &str) -> Result<(), hound::Error> {

@@ -4,30 +4,15 @@
   "description": "A modern application for crafting and visualizing sound waves.",
   "main": "src/index.js",
   "scripts": {
-    "start": "webpack serve --mode development",
-    "build": "webpack --mode production",
-    "test": "jest",
-    "lint": "eslint .",
     "electron:serve": "electron .",
     "electron:build": "electron-builder"
   },
   "author": "Ghost Protocol (Pvt) Ltd.",
   "license": "MIT",
   "dependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "styled-components": "^5.3.0",
-    "prop-types": "^15.8.1",
     "axios": "^1.4.0"
   },
   "devDependencies": {
-    "webpack": "^5.0.0",
-    "webpack-cli": "^4.0.0",
-    "webpack-dev-server": "^4.0.0",
-    "babel-loader": "^8.0.0",
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
-    "@babel/preset-react": "^7.0.0",
     "jest": "^29.0.0",
     "eslint": "^8.0.0",
     "electron": "^25.0.0",

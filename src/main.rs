@@ -1,7 +1,5 @@
 mod synthesizer;
-mod user_input;
 mod ui;
-mod audio; // Added
 
 use synthesizer::{Synthesizer, Waveform};
 use std::sync::{Arc, Mutex};

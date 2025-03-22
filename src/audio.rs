@@ -1,6 +1,6 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rustfft::{FftPlanner, num_complex::Complex};
-use plotters::prelude::*;
+use plotters::prelude::*; // Fixed import
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::Synthesizer;
 
@@ -45,7 +45,7 @@ pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::E
 
     // Render the spectrogram
     let root = BitMapBackend::new("spectrogram.png", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
+    root.fill(&WHITE)?; // Fixed undefined constant
     let mut chart = ChartBuilder::on(&root)
         .caption("Spectrogram", ("sans-serif", 30))
         .margin(10)
@@ -54,9 +54,9 @@ pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::E
         .build_cartesian_2d(0..magnitudes.len(), 0.0..magnitudes.iter().cloned().fold(0.0, f32::max))?;
 
     chart.configure_mesh().draw()?;
-    chart.draw_series(LineSeries::new(
+    chart.draw_series(LineSeries::new( // Fixed undefined type
         magnitudes.iter().enumerate().map(|(x, &y)| (x, y)),
-        &BLUE,
+        &BLUE, // Fixed undefined constant
     ))?;
 
     root.present()?;

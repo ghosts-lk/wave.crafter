@@ -35,6 +35,16 @@ ipcMain.on('export-audio', (event, audioBuffer) => {
     }
 });
 
+ipcMain.on('add-track', (event, track) => {
+    console.log(`Adding track: ${track.id}`);
+    // Communicate with Rust backend to add a track
+});
+
+ipcMain.on('set-effect', (event, effect) => {
+    console.log(`Setting effect: ${effect.effect} to ${effect.value}`);
+    // Communicate with Rust backend to set effect parameters
+});
+
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
