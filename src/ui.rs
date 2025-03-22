@@ -1,30 +1,29 @@
 use crate::synthesizer::{Synthesizer, Waveform};
 use std::sync::{Arc, Mutex};
-use egui::plot::{Line, PlotPoints}; // Correct import for `Values` equivalent in `egui`
+use egui::plot::{Line, Plot, PlotPoints};
 
 pub struct SynthesizerApp {
     synthesizer: Arc<Mutex<Synthesizer>>,
-    frequency: f32,
+    frequency_left: f32,
+    frequency_right: f32, // Added for binaural audio
     amplitude: f32,
     waveform: Waveform,
     preset: String,
+    paused: bool,
 }
 
 impl SynthesizerApp {
     pub fn new(synthesizer: Arc<Mutex<Synthesizer>>) -> Self {
         let synth = synthesizer.lock().unwrap();
         Self {
-            synthesizer: synthesizer.clone(), // Clone instead of moving
-            frequency: synth.frequency,
+            synthesizer: synthesizer.clone(),
+            frequency_left: synth.frequency_left,
+            frequency_right: synth.frequency_right, // Initialize right frequency
             amplitude: synth.amplitude,
             waveform: synth.waveform,
             preset: String::new(),
+            paused: false,
         }
-    }
-
-    pub fn render(&self, ui: &mut egui::Ui) {
-        let points: PlotPoints = /* ...generate points... */;
-        ui.add(Line::new(points)); // Use `PlotPoints` instead of `Values`
     }
 }
 
@@ -33,17 +32,29 @@ impl eframe::App for SynthesizerApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Synthesizer Controls");
 
-            // Frequency slider
+            // Frequency sliders for binaural audio
             ui.horizontal(|ui| {
-                ui.label("Frequency (Hz):");
+                ui.label("Left Frequency (Hz):");
                 if ui
-                    .add(egui::Slider::new(&mut self.frequency, 20.0..=2000.0))
+                    .add(egui::Slider::new(&mut self.frequency_left, 20.0..=2000.0))
                     .changed()
                 {
                     self.synthesizer
                         .lock()
                         .unwrap()
-                        .set_frequency(self.frequency);
+                        .set_binaural_frequencies(self.frequency_left, self.frequency_right);
+                }
+            });
+            ui.horizontal(|ui| {
+                ui.label("Right Frequency (Hz):");
+                if ui
+                    .add(egui::Slider::new(&mut self.frequency_right, 20.0..=2000.0))
+                    .changed()
+                {
+                    self.synthesizer
+                        .lock()
+                        .unwrap()
+                        .set_binaural_frequencies(self.frequency_left, self.frequency_right);
                 }
             });
 
@@ -90,6 +101,16 @@ impl eframe::App for SynthesizerApp {
                 }
             });
 
+            // Play/Pause buttons
+            ui.horizontal(|ui| {
+                if ui.button("Play").clicked() {
+                    self.paused = false;
+                }
+                if ui.button("Pause").clicked() {
+                    self.paused = true;
+                }
+            });
+
             // Preset management
             ui.horizontal(|ui| {
                 if ui.button("Save Preset").clicked() {
@@ -100,16 +121,30 @@ impl eframe::App for SynthesizerApp {
                 }
             });
 
-            // Waveform rendering
+            // Export to WAV button
+            if ui.button("Export to WAV").clicked() {
+                let synthesizer = self.synthesizer.lock().unwrap();
+                if let Err(err) = synthesizer.export_to_wav(5.0, "output.wav") {
+                    eprintln!("Failed to export audio: {}", err);
+                }
+            }
+
+            // Enhanced waveform rendering
             ui.horizontal(|ui| {
                 ui.label("Waveform Preview:");
                 let points: Vec<[f32; 2]> = (0..1000)
                     .map(|i| {
                         let t = i as f32 / 1000.0;
-                        [t, self.synthesizer.lock().unwrap().generate_sample(t)]
+                        [t, self.synthesizer.lock().unwrap().generate_sample(t, true)]
                     })
                     .collect();
-                ui.add(Line::new(PlotPoints::from(points))); // Use `PlotPoints` instead of `Values`
+                let points: PlotPoints = PlotPoints::from(
+                    points.iter().map(|&[x, y]| [x as f64, y as f64]).collect::<Vec<_>>()
+                );
+                Plot::new("line_plot")
+                    .show(ui, |plot_ui| {
+                        plot_ui.line(Line::new(points));
+                    });
             });
         });
     }

@@ -1,6 +1,7 @@
-# WaveCrafter
+# Wave Crafter
 
-WaveCrafter is a high-grade application for crafting and visualizing sound waves with a modern graphical user interface (GUI) for real-time sound generation and control.
+## Overview
+Wave Crafter is a Rust-based audio synthesizer that generates waveforms.
 
 ## Features
 - **Real-time waveform rendering**: Visualize the waveform as you adjust parameters.
@@ -9,30 +10,53 @@ WaveCrafter is a high-grade application for crafting and visualizing sound waves
 - **Keyboard input**: Play notes dynamically using your computer keyboard.
 - **Cross-platform support**: Works on Windows, macOS, and Linux.
 
+## New Features
+- **Dark Mode**: Toggle between light and dark themes.
+- **Audio Export**: Save generated audio as `.wav` files.
+- **Cross-Platform Desktop App**: Now available as a desktop application using Electron.js.
+
 ## Requirements
 - Rust (latest stable version)
-- `cargo` build tool
+- `cpal` and `egui` crates
 
 ## Dependencies
 The following crates are used in this project:
 - [`cpal`](https://crates.io/crates/cpal): For audio output.
 - [`eframe`](https://crates.io/crates/eframe) and [`egui`](https://crates.io/crates/egui): For the graphical user interface.
 
-## Installation
+## Instructions
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ghosts-lk/wave.crafter
+   git clone https://github.com/your-repo/wave.crafter.git
    cd wave.crafter
    ```
 
 2. Build the project:
    ```bash
-   cargo build --release
+   cargo build
    ```
 
-3. Run the synthesizer:
+3. Run the application:
    ```bash
-   cargo run --release
+   cargo run
+   ```
+
+4. Ensure your audio device supports the sample format used by the application.
+
+## Build Instructions
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run the app in development mode:
+   ```bash
+   npm run electron:serve
+   ```
+
+3. Build the desktop app:
+   ```bash
+   npm run electron:build
    ```
 
 ## Usage
@@ -50,6 +74,13 @@ The following crates are used in this project:
   - `Z`, `X`, `C`, `V`, `B`, `N`, `M`: Play notes in the current octave.
   - `A`, `S`, `D`, `F`, `G`, `H`, `J`: Play sharp/flat notes.
   - `,` and `.`: Shift the octave down or up.
+
+## Troubleshooting
+- If you encounter errors, ensure all dependencies are up-to-date:
+  ```bash
+  cargo update
+  ```
+- For unsupported sample formats, modify the `SampleFormat` match arms in `src/main.rs`.
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.

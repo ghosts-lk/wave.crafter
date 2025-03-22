@@ -1,7 +1,7 @@
 use crate::synthesizer::{Synthesizer, Waveform};
-use std::io::{self, Write};
 use std::sync::{Arc, Mutex};
 
+/*
 pub fn handle_user_input(synth: Arc<Mutex<Synthesizer>>) {
     loop {
         println!("Enter command (freq [Hz], amp [0-1], wave [sine|square|triangle|sawtooth]):");
@@ -57,3 +57,4 @@ pub fn handle_user_input(synth: Arc<Mutex<Synthesizer>>) {
         }
     }
 }
+*/
