@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 use hound; // Add this crate to Cargo.toml for WAV file handling
 use serde::{Serialize, Deserialize}; // Ensure serde traits are imported
-use crate::mixer::Mixer; // Adjusted import path
+use crate::mixer::Mixer; // Updated import path
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)] // Add Serialize and Deserialize
 pub enum Waveform {
@@ -132,6 +132,16 @@ impl Synthesizer {
         let json = std::fs::read_to_string(filename)?;
         self.timeline = serde_json::from_str(&json)?;
         Ok(())
+    }
+
+    pub fn apply_effects(&mut self, time: f32) -> f32 {
+        let mut sample = self.generate_timeline_sample(time); // Use `generate_timeline_sample`
+        sample += self.effects.delay * 0.01; // Example effect application
+        sample
+    }
+
+    pub fn update_effect(&mut self, effect: &str, value: f32) {
+        self.set_effect(effect, value); // Use `set_effect`
     }
 }
 

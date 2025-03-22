@@ -2,7 +2,7 @@ use eframe::egui;
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::{Synthesizer, Waveform};
 use std::thread;
-use crate::audio; // Adjusted import path
+use crate::audio::play_audio; // Updated import path
 
 pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions::default();
@@ -10,7 +10,7 @@ pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     // Start audio playback in a separate thread
     let synth_clone = Arc::clone(&synth);
     thread::spawn(move || {
-        if let Err(e) = audio::play_audio(synth_clone) { // Updated to use audio directly
+        if let Err(e) = play_audio(synth_clone) { // Updated to call `play_audio` directly
             eprintln!("Audio playback error: {}", e);
         }
     });
@@ -114,40 +114,50 @@ impl eframe::App for WaveCrafterApp {
             ui.heading("Effects");
             ui.horizontal(|ui| {
                 ui.label("Delay:");
-                let mut delay = synth.effects.delay;
+                let mut delay = synth.effects.delay;wrap().effects.delay;
                 if ui.add(egui::Slider::new(&mut delay, 0.0..=100.0)).changed() {
-                    synth.effects.delay = delay;
+                    synth.effects.delay = delay;pdate_effect("delay", delay); // Use `set_effect`
                 }
             });
 
-            ui.separator();
-            ui.heading("Project");
-
-            // Add export functionality
+            ui.separator();eline sample for visualization
+            ui.heading("Project");mple time value
+            let sample = self.synth.lock().unwrap().apply_effects(time); // Use `generate_timeline_sample`
+            // Add export functionality time {}: {}", time, sample));
             if ui.button("💾 Export Project").clicked() {
                 if let Err(e) = synth.save_project("project.json") {
                     eprintln!("Failed to save project: {}", e);
                 }
-            }
-
-            if ui.button("💾 Export Audio").clicked() {
-                println!("Exporting audio...");
+            }/ Add export functionality
+            if ui.button("💾 Export Project").clicked() {
+            if ui.button("💾 Export Audio").clicked() {ject.json") {
+                println!("Exporting audio...");roject: {}", e);
                 if let Err(e) = synth.export_to_wav(5.0, "output.wav") {
                     eprintln!("Failed to export audio: {}", e);
                 }
-            }
-
-            if ui.button("Save Project").clicked() {
+            }f ui.button("💾 Export Audio").clicked() {
+                println!("Exporting audio...");
+            if ui.button("Save Project").clicked() {5.0, "output.wav") {
                 if let Err(e) = synth.save_project("project.json") {
                     eprintln!("Failed to save project: {}", e);
                 }
             }
-
-            if ui.button("Load Project").clicked() {
+            if ui.button("Save Project").clicked() {
+            if ui.button("Load Project").clicked() {project.json") {
                 if let Err(e) = synth.load_project("project.json") {
                     eprintln!("Failed to load project: {}", e);
                 }
             }
+ if ui.button("Load Project").clicked() {
+            if ui.button("Generate Spectrogram").clicked() {           if let Err(e) = synth.load_project("project.json") {
+                let samples = vec![0.0; 44100]; // Example samples                   eprintln!("Failed to load project: {}", e);
+                crate::audio::process_audio(&samples); // Use `generate_spectrogram`                }
+
+
+
+
+
+}    }        });            }            }
         });
     }
 }

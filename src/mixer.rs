@@ -20,4 +20,8 @@ impl Mixer {
         }
         mixed_sample
     }
+
+    pub fn apply_mixing(&self, time: f32) -> f32 {
+        self.mix_tracks(time) // Use `mix_tracks`
+    }
 }

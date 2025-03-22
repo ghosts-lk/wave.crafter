@@ -1,5 +1,7 @@
 mod synthesizer;
 mod ui;
+mod mixer; // Updated to declare directly
+mod audio; // Updated to declare directly
 
 use synthesizer::{Synthesizer, Waveform};
 use std::sync::{Arc, Mutex};

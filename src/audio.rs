@@ -62,3 +62,9 @@ pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::E
     println!("Spectrogram saved to spectrogram.png");
     Ok(())
 }
+
+pub fn process_audio(samples: &[f32]) {
+    if let Err(e) = generate_spectrogram(samples) { // Use `generate_spectrogram`
+        eprintln!("Failed to generate spectrogram: {}", e);
+    }
+}
