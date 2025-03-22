@@ -12,6 +12,8 @@ Wave Crafter is a Rust-based audio synthesizer that generates waveforms.
 
 ## New Features
 - **Dark Mode**: Toggle between light and dark themes.
+- **Real-time Spectrogram**: Visualize audio frequencies in real-time.
+- **Improved UI**: Added a dark mode toggle and spectrogram canvas.
 - **Audio Export**: Save generated audio as `.wav` files.
 - **Cross-Platform Desktop App**: Now available as a desktop application using Electron.js.
 
@@ -68,6 +70,8 @@ The following crates are used in this project:
   - Click "Save Preset" to save the current configuration.
   - Click "Load Preset" to restore the saved configuration.
 - **Waveform Preview**: View the real-time waveform rendering in the GUI.
+- **Dark Mode Toggle**: Switch between light and dark themes.
+- **Real-time Spectrogram**: View the spectrogram in the canvas below the controls.
 
 ### Keyboard Input
 - Use the following keys to play notes dynamically:

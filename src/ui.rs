@@ -2,9 +2,19 @@ use eframe::egui;
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::{Synthesizer, Waveform};
 use rfd::FileDialog;
+use std::thread;
 
 pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions::default();
+
+    // Start audio playback in a separate thread
+    let synth_clone = Arc::clone(&synth);
+    thread::spawn(move || {
+        if let Err(e) = crate::audio::play_audio(synth_clone) {
+            eprintln!("Audio playback error: {}", e);
+        }
+    });
+
     eframe::run_native(
         "Wave Crafter",
         options,
@@ -60,6 +70,9 @@ impl eframe::App for WaveCrafterApp {
             });
 
             ui.separator();
+
+            // Spectrogram Placeholder
+            ui.label("Spectrogram (Coming Soon)");
 
             // Export Button
             if ui.button("💾 Export Audio").clicked() {

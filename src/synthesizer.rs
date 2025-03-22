@@ -49,32 +49,6 @@ impl Synthesizer {
         self.waveform = waveform;
     }
 
-    pub fn save_preset(&self) -> String {
-        format!("{},{},{}", self.frequency_left, self.amplitude, self.waveform as u8)
-    }
-
-    pub fn load_preset(&mut self, preset: &str) {
-        let parts: Vec<&str> = preset.split(',').collect();
-        if parts.len() == 3 {
-            if let Ok(freq) = parts[0].parse::<f32>() {
-                self.frequency_left = freq;
-                self.frequency_right = freq;
-            }
-            if let Ok(amp) = parts[1].parse::<f32>() {
-                self.amplitude = amp;
-            }
-            if let Ok(wave) = parts[2].parse::<u8>() {
-                self.waveform = match wave {
-                    0 => Waveform::Sine,
-                    1 => Waveform::Square,
-                    2 => Waveform::Triangle,
-                    3 => Waveform::Sawtooth,
-                    _ => self.waveform,
-                };
-            }
-        }
-    }
-
     pub fn set_binaural_frequencies(&mut self, left: f32, right: f32) {
         self.frequency_left = left;
         self.frequency_right = right;
@@ -99,10 +73,5 @@ impl Synthesizer {
         }
         writer.finalize()?;
         Ok(())
-    }
-
-    pub fn play_audio(&self, duration: f32) {
-        println!("Playing audio for {} seconds...", duration);
-        // Integrate a real-time audio playback library like `rodio` or `cpal` here
     }
 }

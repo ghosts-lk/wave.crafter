@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Crafter Synthesizer</title>
+    <style>
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wave Crafter Synthesizer</h1>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <br>
+    <label for="frequency">Frequency:</label>
+    <input id="frequency" type="range" min="20" max="2000" value="440">
+    <br>
+    <label for="waveform">Waveform:</label>
+    <select id="waveform">
+        <option value="sine">Sine</option>
+        <option value="square">Square</option>
+        <option value="sawtooth">Sawtooth</option>
+        <option value="triangle">Triangle</option>
+    </select>
+    <br>
+    <button id="record">Start Recording</button>
+    <button id="stop-record">Stop Recording</button>
+    <button id="export">Export Audio</button>
+    <br>
+    <button id="dark-mode-toggle">Toggle Dark Mode</button>
+    <br>
+    <canvas id="spectrogram" width="800" height="200"></canvas>
+    <script src="./app.js" type="module"></script>
+</body>
+</html>
