@@ -2,6 +2,7 @@ use eframe::egui;
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::{Synthesizer, Waveform};
 use std::thread;
+use wave_crafter::audio; // Adjusted import path
 
 pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions::default();
@@ -9,7 +10,7 @@ pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     // Start audio playback in a separate thread
     let synth_clone = Arc::clone(&synth);
     thread::spawn(move || {
-        if let Err(e) = crate::audio::play_audio(synth_clone) {
+        if let Err(e) = audio::play_audio(synth_clone) { // Updated to use audio directly
             eprintln!("Audio playback error: {}", e);
         }
     });
@@ -32,6 +33,9 @@ impl eframe::App for WaveCrafterApp {
             ui.separator();
 
             let mut synth = self.synth.lock().unwrap();
+
+            // Update Mixer with tracks
+            synth.mixer.tracks = synth.tracks.clone();
 
             // Frequency Slider
             ui.horizontal(|ui| {
@@ -91,26 +95,23 @@ impl eframe::App for WaveCrafterApp {
 
             // Add timeline visualization
             ui.heading("Timeline");
+            let mut clips_to_remove = Vec::new(); // Collect clips to remove
             for clip in &mut synth.timeline.clips {
                 ui.horizontal(|ui| {
                     ui.label(&clip.id);
                     ui.add(egui::Slider::new(&mut clip.start_time, 0.0..=60.0).text("Start Time"));
                     ui.add(egui::Slider::new(&mut clip.duration, 0.1..=10.0).text("Duration"));
                     if ui.button("Remove").clicked() {
-                        synth.timeline.remove_clip(&clip.id);
+                        clips_to_remove.push(clip.id.clone()); // Clone clip ID to avoid borrowing issues
                     }
                 });
             }
+            for clip_id in clips_to_remove {
+                synth.timeline.remove_clip(&clip_id); // Remove clips outside the loop
+            }
 
-            // Add effect chains
+            // Update Effects UI
             ui.heading("Effects");
-            ui.horizontal(|ui| {
-                ui.label("Reverb:");
-                let mut reverb = synth.effects.reverb;
-                if ui.add(egui::Slider::new(&mut reverb, 0.0..=100.0)).changed() {
-                    synth.effects.reverb = reverb;
-                }
-            });
             ui.horizontal(|ui| {
                 ui.label("Delay:");
                 let mut delay = synth.effects.delay;

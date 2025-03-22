@@ -1,12 +1,8 @@
-use cpal::{SampleRate, traits::{DeviceTrait, HostTrait, StreamTrait}};
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rustfft::{FftPlanner, num_complex::Complex};
 use plotters::prelude::*;
 use std::sync::{Arc, Mutex};
-use crate::synthesizer::{Synthesizer, Waveform};
-
-struct Config {
-    sample_rate: SampleRate,
-}
+use crate::synthesizer::Synthesizer;
 
 pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::error::Error>> {
     let host = cpal::default_host();
@@ -24,7 +20,7 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
                 let mut time = 0.0;
                 let time_step = 1.0 / config.sample_rate.0 as f32;
                 for sample in data.iter_mut() {
-                    *sample = synth.mixer.mix_tracks(time);
+                    *sample = synth.generate_sample(time, true); // Use Synthesizer's method
                     time += time_step;
                 }
             },
@@ -65,24 +61,4 @@ pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::E
     root.present()?;
     println!("Spectrogram saved to spectrogram.png");
     Ok(())
-}
-
-fn example_function() {
-    // Assuming `config` is part of a struct or passed as a parameter, add it to the scope
-    let config = Config {
-        sample_rate: SampleRate(44100), // Replace with actual initialization
-    };
-
-    // Fix the `Synthesizer::new` call by providing the required arguments
-    let synth: Arc<Mutex<Synthesizer>> = Arc::new(Mutex::new(Synthesizer::new(
-        440.0, // frequency in Hz
-        1.0,   // amplitude
-        Waveform::Sine, // waveform type
-    )));
-    let cloned_synth = Arc::clone(&synth);
-
-    // ...existing code...
-
-    // Fix the `time_step` calculation
-    let time_step = 1.0 / config.sample_rate.0 as f32; // Assuming `SampleRate` is a tuple struct
 }

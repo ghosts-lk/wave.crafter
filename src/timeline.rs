@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use crate::synthesizer::Waveform; // Import Waveform
 
 #[derive(Serialize, Deserialize)]
 pub struct Timeline {
@@ -12,5 +13,5 @@ pub struct Clip {
     pub duration: f32,
     pub frequency: f32,
     pub amplitude: f32,
-    pub waveform: Waveform,
+    pub waveform: Waveform, // Use imported Waveform
 }

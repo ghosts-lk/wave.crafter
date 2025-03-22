@@ -1,8 +1,9 @@
 use std::f32::consts::PI;
 use hound; // Add this crate to Cargo.toml for WAV file handling
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize}; // Ensure serde traits are imported
+use wave_crafter::mixer::Mixer; // Adjusted import path
 
-#[derive(Clone, Copy, PartialEq, Debug)] // Added Debug and Copy
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)] // Add Serialize and Deserialize
 pub enum Waveform {
     Sine,
     Square,
@@ -31,7 +32,7 @@ impl Synthesizer {
             tracks: Vec::new(), // Initialize tracks
             effects: Effects { delay: 0.0 }, // Initialize effects
             timeline: Timeline { clips: Vec::new() }, // Initialize timeline
-            mixer: Mixer { tracks: Vec::new() }, // Initialize mixer
+            mixer: Mixer::new(), // Fix: Properly initialize Mixer
         }
     }
 
@@ -134,6 +135,7 @@ impl Synthesizer {
     }
 }
 
+#[derive(Clone)]
 pub struct Track {
     pub id: String,
     pub volume: f32,
