@@ -4,6 +4,7 @@ use crate::synthesizer::{Synthesizer, Waveform};
 use std::thread;
 use crate::audio::play_audio; // Updated import path
 
+#[allow(dead_code)]
 pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions::default();
 
@@ -26,6 +27,7 @@ pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     )
 }
 
+#[allow(dead_code)]
 struct WaveCrafterApp {
     synth: Arc<Mutex<Synthesizer>>,
     loading: bool, // Track if loading screen is active

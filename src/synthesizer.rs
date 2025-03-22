@@ -1,9 +1,10 @@
 use std::f32::consts::PI;
-use hound; // Add this crate to Cargo.toml for WAV file handling
-use serde::{Serialize, Deserialize}; // Ensure serde traits are imported
-use crate::mixer::Mixer; // Updated import path
+use hound;
+use serde::{Serialize, Deserialize};
+use crate::mixer::Mixer;
+use rayon::prelude::*; // Add Rayon for parallelism
 
-#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)] // Add Serialize and Deserialize
+#[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Waveform {
     Sine,
     Square,
@@ -13,26 +14,27 @@ pub enum Waveform {
 
 pub struct Synthesizer {
     pub frequency_left: f32,
-    pub frequency_right: f32, // Added for binaural audio
+    pub frequency_right: f32,
     pub amplitude: f32,
     pub waveform: Waveform,
-    pub tracks: Vec<Track>, // Added for track management
-    pub effects: Effects,  // Added for effects
-    pub timeline: Timeline, // Added timeline
-    pub mixer: Mixer, // Added mixer for track blending
+    pub tracks: Vec<Track>,
+    pub effects: Effects,
+    pub timeline: Timeline,
+    pub mixer: Mixer,
 }
 
 impl Synthesizer {
+    #[allow(dead_code)] // Suppress warning for unused function
     pub fn new(frequency: f32, amplitude: f32, waveform: Waveform) -> Self {
         Self {
             frequency_left: frequency,
-            frequency_right: frequency, // Default to same frequency for both channels
+            frequency_right: frequency,
             amplitude,
             waveform,
-            tracks: Vec::new(), // Initialize tracks
-            effects: Effects { delay: 0.0 }, // Initialize effects
-            timeline: Timeline { clips: Vec::new() }, // Initialize timeline
-            mixer: Mixer::new(), // Fix: Properly initialize Mixer
+            tracks: Vec::new(),
+            effects: Effects { delay: 0.0 },
+            timeline: Timeline { clips: Vec::new() },
+            mixer: Mixer::new(),
         }
     }
 
@@ -43,18 +45,18 @@ impl Synthesizer {
             self.frequency_right
         };
         let phase = 2.0 * PI * frequency * time;
-        return match self.waveform {
+        return (match self.waveform {
             Waveform::Sine => phase.sin(),
             Waveform::Square => {
                 if phase.sin() >= 0.0 {
-                    return 1.0;
+                    return 1.0; // Add explicit return
                 } else {
-                    return -1.0;
+                    return -1.0; // Add explicit return
                 }
             }
             Waveform::Triangle => 2.0 * (2.0 * frequency * time - (2.0 * frequency * time).floor() - 0.5).abs() - 1.0,
             Waveform::Sawtooth => 2.0 * (frequency * time - (frequency * time).floor()) - 1.0,
-        } * self.amplitude;
+        }) * self.amplitude; // Add parentheses to fix dereferencing issue
     }
 
     pub fn set_amplitude(&mut self, amplitude: f32) {
@@ -87,21 +89,32 @@ impl Synthesizer {
 
     pub fn export_to_wav(&self, duration: f32, filename: &str) -> Result<(), hound::Error> {
         let spec = hound::WavSpec {
-            channels: 2, // Stereo for binaural audio
+            channels: 2,
             sample_rate: 44100,
             bits_per_sample: 16,
-            sample_format: hound::SampleFormat::Int, // Fix: Add missing field
+            sample_format: hound::SampleFormat::Int,
         };
         let mut writer = hound::WavWriter::create(filename, spec)?;
         let sample_rate = spec.sample_rate as f32;
         let max_amplitude = i16::MAX as f32;
-        for i in 0..(duration * sample_rate) as usize {
-            let time = i as f32 / sample_rate;
-            let left_sample = (self.generate_sample(time, true) * max_amplitude) as i16;
-            let right_sample = (self.generate_sample(time, false) * max_amplitude) as i16;
+
+        // Generate samples in parallel
+        let samples: Vec<(i16, i16)> = (0..(duration * sample_rate) as usize)
+            .into_par_iter() // Parallel iterator
+            .map(|i| {
+                let time = i as f32 / sample_rate;
+                let left_sample = (self.generate_sample(time, true) * max_amplitude) as i16;
+                let right_sample = (self.generate_sample(time, false) * max_amplitude) as i16;
+                (left_sample, right_sample)
+            })
+            .collect();
+
+        // Write samples to the WAV file
+        for (left_sample, right_sample) in samples {
             writer.write_sample(left_sample)?;
             writer.write_sample(right_sample)?;
         }
+
         writer.finalize()?;
         Ok(())
     }
@@ -135,19 +148,19 @@ impl Synthesizer {
     }
 
     pub fn apply_effects(&mut self, time: f32) -> f32 {
-        let mut sample = self.generate_timeline_sample(time); // Use `generate_timeline_sample`
-        sample += self.effects.delay * 0.01; // Example effect application
+        let mut sample = self.generate_timeline_sample(time);
+        sample += self.effects.delay * 0.01;
         sample
     }
 
     pub fn update_effect(&mut self, effect: &str, value: f32) {
-        self.set_effect(effect, value); // Use `set_effect`
+        self.set_effect(effect, value);
     }
 
     pub fn generate_mixed_sample(&self, time: f32) -> f32 {
-        let base_sample = self.generate_timeline_sample(time); // Generate timeline sample
-        let mixed_sample = self.mixer.apply_mixing(time); // Use `apply_mixing` from Mixer
-        base_sample + mixed_sample // Combine base and mixed samples
+        let base_sample = self.generate_timeline_sample(time);
+        let mixed_sample = self.mixer.apply_mixing(time);
+        base_sample + mixed_sample
     }
 }
 
@@ -162,7 +175,7 @@ pub struct Effects {
     pub delay: f32,
 }
 
-#[derive(Serialize, Deserialize, Clone)] // Added Serialize and Deserialize
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Clip {
     pub id: String,
     pub start_time: f32,
@@ -173,18 +186,11 @@ pub struct Clip {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct AudioClip {
-    // ...existing code...
-}
-
-#[derive(Serialize, Deserialize)]
 pub struct Timeline {
-    pub clips: Vec<Clip>, // Add the missing `clips` field
-    // ...existing code...
+    pub clips: Vec<Clip>,
 }
 
 impl Timeline {
-    // Add the `remove_clip` method
     pub fn remove_clip(&mut self, clip_id: &str) {
         self.clips.retain(|clip| clip.id != clip_id);
     }

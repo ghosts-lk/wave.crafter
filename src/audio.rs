@@ -3,7 +3,9 @@ use rustfft::{FftPlanner, num_complex::Complex};
 use plotters::prelude::*;
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::Synthesizer;
+use crossbeam_channel::{bounded, Receiver}; // Remove unused `Sender`
 
+#[allow(dead_code)]
 pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::error::Error>> {
     let host = cpal::default_host();
     let device = host.default_output_device().ok_or("No output device available")?;
@@ -11,17 +13,33 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
     let sample_format = supported_config.sample_format();
     let config: cpal::StreamConfig = supported_config.into();
 
-    let synth = Arc::clone(&synth);
+    // Create a channel for audio samples
+    let (sender, receiver): (crossbeam_channel::Sender<f32>, Receiver<f32>) = bounded(1024);
+
+    // Audio generation thread
+    let synth_clone = Arc::clone(&synth);
+    std::thread::spawn(move || {
+        let mut time = 0.0;
+        let time_step = 1.0 / config.sample_rate.0 as f32;
+        loop {
+            let synth = synth_clone.lock().unwrap();
+            for _ in 0..1024 {
+                let sample = synth.generate_mixed_sample(time);
+                if sender.send(sample).is_err() {
+                    return; // Exit if the receiver is dropped
+                }
+                time += time_step;
+            }
+        }
+    });
+
+    // Audio playback thread
     let stream = match sample_format {
         cpal::SampleFormat::F32 => device.build_output_stream(
             &config,
             move |data: &mut [f32], _| {
-                let synth = synth.lock().unwrap();
-                let mut time = 0.0;
-                let time_step = 1.0 / config.sample_rate.0 as f32;
                 for sample in data.iter_mut() {
-                    *sample = synth.generate_mixed_sample(time); // Use `generate_mixed_sample`
-                    time += time_step;
+                    *sample = receiver.recv().unwrap_or(0.0); // Fetch samples from the channel
                 }
             },
             |err| eprintln!("Stream error: {}", err),
@@ -35,6 +53,7 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::Error>> {
     let mut planner = FftPlanner::new();
     let fft = planner.plan_fft_forward(samples.len());
@@ -63,6 +82,7 @@ pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::E
     Ok(())
 }
 
+#[allow(dead_code)]
 pub fn process_audio(samples: &[f32]) {
     if let Err(e) = generate_spectrogram(samples) { // Use `generate_spectrogram`
         eprintln!("Failed to generate spectrogram: {}", e);

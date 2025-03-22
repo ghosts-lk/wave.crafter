@@ -1,9 +1,11 @@
 use crate::synthesizer::Track;
 
+#[allow(dead_code)]
 pub struct Mixer {
     pub tracks: Vec<Track>, // Store tracks for mixing
 }
 
+#[allow(dead_code)]
 impl Mixer {
     pub fn new() -> Self {
         Mixer {
