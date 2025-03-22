@@ -1,15 +1,17 @@
-# Wave Crafter
+# WaveCraft
 
 ## Overview
-Wave Crafter is a Rust-based audio synthesizer that generates waveforms.
+WaveCraft is a Rust-based audio synthesizer that generates waveforms.
 
 ## Features
 - **Real-time waveform rendering**: Visualize the waveform as you adjust parameters.
 - **Adjustable controls**: Modify frequency, amplitude, and waveform type (Sine, Square, Triangle, Sawtooth).
 - **Cross-platform support**: Works on Windows, macOS, and Linux.
+- **Standalone executable**: Package the app for distribution.
 
 ## Requirements
 - Rust (latest stable version)
+- `cargo-bundle` for packaging (install with `cargo install cargo-bundle`)
 
 ## Instructions
 1. Clone the repository:
@@ -20,15 +22,20 @@ Wave Crafter is a Rust-based audio synthesizer that generates waveforms.
 
 2. Build the project:
    ```bash
-   cargo build
+   cargo build --release
    ```
 
 3. Run the application:
    ```bash
-   cargo run
+   cargo run --release
    ```
 
-4. Ensure your audio device supports the sample format used by the application.
+4. Package the application as a standalone executable:
+   ```bash
+   cargo bundle
+   ```
+
+5. Ensure your audio device supports the sample format used by the application.
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.

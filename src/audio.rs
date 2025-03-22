@@ -17,11 +17,11 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
             &config,
             move |data: &mut [f32], _| {
                 let synth = synth.lock().unwrap();
+                let mut time = 0.0;
+                let time_step = 1.0 / config.sample_rate as f32;
                 for sample in data.iter_mut() {
-                    *sample = synth.generate_sample(0.0, true);
-                }
-                if let Err(e) = generate_spectrogram(data) {
-                    eprintln!("Spectrogram generation error: {}", e);
+                    *sample = synth.generate_timeline_sample(time);
+                    time += time_step;
                 }
             },
             |err| eprintln!("Stream error: {}", err),

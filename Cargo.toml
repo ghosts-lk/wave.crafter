@@ -12,3 +12,8 @@ serde_json = "1.0"
 hound = "3.4.0"
 plotters = "0.3"
 rustfft = "6.0"
+
+[package.metadata.bundle]
+name = "Wave Crafter"
+identifier = "com.example.wavecrafter"
+icon = "assets/icon.png" # Add an icon file in the assets directory

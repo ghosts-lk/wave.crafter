@@ -16,24 +16,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
       - name: Set up Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
 
-      - name: Install dependencies
-        run: npm install
+      - name: Build project
+        run: cargo build --release
 
       - name: Run tests
-        run: npm test
-
-      - name: Build project
-        run: npm run build
-
-      - name: Test Rust code
         run: cargo test

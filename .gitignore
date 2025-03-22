@@ -4,3 +4,8 @@ Thumbs.db
 
 # Rust build artifacts
 target/
+
+# Bundled executables
+*.exe
+*.app
+*.deb

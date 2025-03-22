@@ -91,31 +91,71 @@ impl eframe::App for WaveCrafterApp {
             }
 
             ui.separator();
-
+            ui.heading("Timeline");
             // Effects
-            ui.heading("Effects");
-            ui.horizontal(|ui| {
-                ui.label("Reverb:");
+            ui.heading("Effects");").clicked() {
+            ui.horizontal(|ui| {dd_clip(AudioClip {
+                ui.label("Reverb:");p {}", synth.timeline.clips.len() + 1),
                 let mut reverb = synth.effects.reverb;
                 if ui.add(egui::Slider::new(&mut reverb, 0.0..=100.0)).changed() {
                     synth.set_effect("reverb", reverb);
-                }
-            });
+                }   frequency: 440.0,
+            });     amplitude: 0.5,
             ui.horizontal(|ui| {
                 ui.label("Delay:");
                 let mut delay = synth.effects.delay;
                 if ui.add(egui::Slider::new(&mut delay, 0.0..=100.0)).changed() {
                     synth.set_effect("delay", delay);
-                }
-            });
+                }   ui.label(&clip.id);
+            });     ui.add(egui::Slider::new(&mut clip.start_time, 0.0..=10.0).text("Start Time"));
+                    ui.add(egui::Slider::new(&mut clip.duration, 0.1..=5.0).text("Duration"));
+                    if ui.button("Remove").clicked() {
+                        synth.timeline.remove_clip(&clip.id);
+                    }
+                });
+            }
 
             ui.separator();
 
-            // Export Button
-            if ui.button("💾 Export Audio").clicked() {
-                println!("Exporting audio...");
-                if let Err(e) = synth.export_to_wav(5.0, "output.wav") {
-                    eprintln!("Failed to export audio: {}", e);
+            // Effects
+            ui.heading("Effects");
+            ui.horizontal(|ui| {       ui.separator();
+                ui.label("Reverb:");           ui.heading("Project");
+                let mut reverb = synth.effects.reverb;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}    }        });            }                }                    eprintln!("Failed to export audio: {}", e);                if let Err(e) = synth.export_to_wav(5.0, "output.wav") {                println!("Exporting audio...");            if ui.button("💾 Export Audio").clicked() {            // Export Button            ui.separator();            });                }                    synth.set_effect("delay", delay);                if ui.add(egui::Slider::new(&mut delay, 0.0..=100.0)).changed() {                let mut delay = synth.effects.delay;                ui.label("Delay:");            ui.horizontal(|ui| {            });                }                    synth.set_effect("reverb", reverb);                if ui.add(egui::Slider::new(&mut reverb, 0.0..=100.0)).changed() {            if ui.button("Save Project").clicked() {
+                if let Err(e) = synth.save_project("project.json") {
+                    eprintln!("Failed to save project: {}", e);
+                }
+            }
+
+            if ui.button("Load Project").clicked() {
+                if let Err(e) = synth.load_project("project.json") {
+                    eprintln!("Failed to load project: {}", e);
                 }
             }
         });
