@@ -3,7 +3,7 @@ use hound;
 use serde::{Serialize, Deserialize};
 use crate::mixer::Mixer; // Import Mixer for track mixing
 use rayon::prelude::*;   // Import Rayon for parallel processing
-use crate::effects::Effects as AudioEffects; // Rename Effects to avoid conflicts
+use crate::effects::Effects as AudioEffects; // Correctly reference the effects module
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Waveform {
@@ -54,14 +54,16 @@ impl Synthesizer {
             self.frequency_right // Use right channel frequency
         };
         let phase = 2.0 * PI * frequency * time; // Calculate phase
-        return (match self.waveform {
+        let raw_sample = match self.waveform {
             Waveform::Sine => phase.sin(), // Generate sine wave
             Waveform::Square => {
                 if phase.sin() >= 0.0 { 1.0 } else { -1.0 } // Generate square wave
             }
             Waveform::Triangle => 2.0 * (2.0 * frequency * time - (2.0 * frequency * time).floor() - 0.5).abs() - 1.0, // Generate triangle wave
             Waveform::Sawtooth => 2.0 * (frequency * time - (frequency * time).floor()) - 1.0, // Generate sawtooth wave
-        }) * self.amplitude; // Scale by amplitude
+        } * self.amplitude; // Scale by amplitude
+
+        self.effects.apply(raw_sample) // Apply effects to the generated sample
     }
 
     pub fn set_amplitude(&mut self, amplitude: f32) {
@@ -130,12 +132,14 @@ impl Synthesizer {
         for clip in &self.timeline.clips {
             if time >= clip.start_time && time < clip.start_time + clip.duration {
                 let phase = 2.0 * PI * clip.frequency * (time - clip.start_time);
-                sample += match clip.waveform {
+                let raw_sample = match clip.waveform {
                     Waveform::Sine => phase.sin(),
                     Waveform::Square => if phase.sin() >= 0.0 { 1.0 } else { -1.0 },
                     Waveform::Triangle => 2.0 * (2.0 * clip.frequency * (time - clip.start_time) - (2.0 * clip.frequency * (time - clip.start_time)).floor() - 0.5).abs() - 1.0,
                     Waveform::Sawtooth => 2.0 * (clip.frequency * (time - clip.start_time) - (clip.frequency * (time - clip.start_time)).floor()) - 1.0,
                 } * clip.amplitude;
+
+                sample += self.effects.apply(raw_sample); // Apply effects to each clip's sample
             }
         }
         sample

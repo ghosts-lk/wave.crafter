@@ -12,10 +12,11 @@ impl Mixer {
     }
 
     pub fn mix_tracks(&self, time: f32) -> f32 {
-        let mut mixed_sample = 0.0; // Initialize the mixed sample
+        let mut mixed_sample = 0.0;
         for track in &self.tracks {
             if !track.muted {
-                mixed_sample += track.volume * time.sin(); // Adjust mixing logic
+                let raw_sample = track.volume * time.sin(); // Adjust mixing logic
+                mixed_sample += raw_sample; // Sum raw samples
             }
         }
         mixed_sample // Return the mixed sample

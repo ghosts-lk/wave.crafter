@@ -22,6 +22,11 @@ WaveCraft is a Rust-based digital audio workstation (DAW) and synthesizer that a
 ## Requirements
 - Rust (latest stable version)
 - `cargo-bundle` for packaging (install with `cargo install cargo-bundle`)
+- System dependencies for GTK:
+  ```bash
+  sudo apt-get update
+  sudo apt-get install -y libfontconfig1-dev libglib2.0-dev
+  ```
 
 ## Instructions
 
@@ -58,6 +63,8 @@ Create a standalone executable:
 ```bash
 cargo bundle
 ```
+
+> **Note**: Ensure the `assets/icon.png` file exists for packaging.
 
 ## License
 This project is licensed under the MIT License. See the `LICENSE` file for details.

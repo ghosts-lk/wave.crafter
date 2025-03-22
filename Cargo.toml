@@ -7,20 +7,20 @@ license = "MIT"
 repository = "https://github.com/your-repo/wave.crafter"
 
 [dependencies]
-cpal = "0.15"
-eframe = "0.22"
-egui = "0.22"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-hound = "3.4.0"
-plotters = "0.3"
-rustfft = "6.0"
-gtk = "0.18"
-glib = "0.18"
-tokio = { version = "1", features = ["full"] }
-rayon = "1.7" # Add Rayon for parallelism
-crossbeam = "0.8" # Add Crossbeam for thread-safe communication
-crossbeam-channel = "0.5" # Add crossbeam-channel for thread-safe communication
+cpal = "0.15"            # For audio playback
+eframe = "0.22"          # For GUI framework
+egui = "0.22"            # For GUI components
+serde = { version = "1.0", features = ["derive"] } # For serialization/deserialization
+serde_json = "1.0"       # For JSON handling
+hound = "3.4.0"          # For WAV file handling
+plotters = "0.3"         # For spectrogram generation
+rustfft = "6.0"          # For FFT processing
+gtk = "0.18"             # For GTK-based UI
+glib = "0.18"            # For GLib utilities
+tokio = { version = "1", features = ["full"] } # For async runtime
+rayon = "1.7"            # For parallel processing
+crossbeam = "0.8"        # For thread-safe communication
+crossbeam-channel = "0.5" # For thread-safe channels
 
 [package.metadata.bundle]
 name = "Wave Crafter"

@@ -17,7 +17,9 @@ jobs:
         uses: actions/checkout@v3 # Check out the repository code
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev # Install required system dependencies for building and testing
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfontconfig1-dev libglib2.0-dev # Install required system dependencies
 
       - name: Set up Rust
         uses: actions-rs/toolchain@v1 # Set up the Rust toolchain
