@@ -143,6 +143,12 @@ impl Synthesizer {
     pub fn update_effect(&mut self, effect: &str, value: f32) {
         self.set_effect(effect, value); // Use `set_effect`
     }
+
+    pub fn generate_mixed_sample(&self, time: f32) -> f32 {
+        let base_sample = self.generate_timeline_sample(time); // Generate timeline sample
+        let mixed_sample = self.mixer.apply_mixing(time); // Use `apply_mixing` from Mixer
+        base_sample + mixed_sample // Combine base and mixed samples
+    }
 }
 
 #[derive(Clone)]

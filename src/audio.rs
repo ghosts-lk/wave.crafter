@@ -20,7 +20,7 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
                 let mut time = 0.0;
                 let time_step = 1.0 / config.sample_rate.0 as f32;
                 for sample in data.iter_mut() {
-                    *sample = synth.generate_sample(time, true); // Use Synthesizer's method
+                    *sample = synth.generate_mixed_sample(time); // Use `generate_mixed_sample`
                     time += time_step;
                 }
             },
