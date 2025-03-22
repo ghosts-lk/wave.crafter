@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 use hound; // Add this crate to Cargo.toml for WAV file handling
 use serde::{Serialize, Deserialize}; // Ensure serde traits are imported
-use wave_crafter::mixer::Mixer; // Adjusted import path
+use crate::mixer::Mixer; // Adjusted import path
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)] // Add Serialize and Deserialize
 pub enum Waveform {

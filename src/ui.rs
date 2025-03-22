@@ -2,7 +2,7 @@ use eframe::egui;
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::{Synthesizer, Waveform};
 use std::thread;
-use wave_crafter::audio; // Adjusted import path
+use crate::audio; // Adjusted import path
 
 pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
     let options = eframe::NativeOptions::default();

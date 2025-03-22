@@ -2,6 +2,9 @@
 name = "wave_crafter"
 version = "0.1.0"
 edition = "2021"
+description = "WaveCraft is a Rust-based audio synthesizer and digital audio workstation."
+license = "MIT"
+repository = "https://github.com/your-repo/wave.crafter"
 
 [dependencies]
 cpal = "0.15"
@@ -16,4 +19,4 @@ rustfft = "6.0"
 [package.metadata.bundle]
 name = "Wave Crafter"
 identifier = "com.example.wavecrafter"
-icon = "assets/icon.png" # Add an icon file in the assets directory
+icon = "assets/icon.png" # Ensure this file exists
