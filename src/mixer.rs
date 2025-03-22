@@ -1,11 +1,9 @@
 use crate::synthesizer::Track;
 
-#[allow(dead_code)]
 pub struct Mixer {
     pub tracks: Vec<Track>, // Store tracks for mixing
 }
 
-#[allow(dead_code)]
 impl Mixer {
     pub fn new() -> Self {
         Mixer {
@@ -13,14 +11,14 @@ impl Mixer {
         }
     }
 
-    pub fn mix_tracks(&self, _time: f32) -> f32 {
-        let mut mixed_sample = 0.0;
+    pub fn mix_tracks(&self, time: f32) -> f32 {
+        let mut mixed_sample = 0.0; // Initialize the mixed sample
         for track in &self.tracks {
             if !track.muted {
-                mixed_sample += track.volume; // Simplified mixing logic
+                mixed_sample += track.volume * time.sin(); // Adjust mixing logic
             }
         }
-        mixed_sample
+        mixed_sample // Return the mixed sample
     }
 
     pub fn apply_mixing(&self, time: f32) -> f32 {

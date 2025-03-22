@@ -3,29 +3,29 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - main # Trigger CI on push to the main branch
   pull_request:
     branches:
-      - main
+      - main # Trigger CI on pull requests targeting the main branch
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Use the latest Ubuntu environment for the CI job
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 # Check out the repository code
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev # Install required system dependencies for building and testing
 
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
+        uses: actions-rs/toolchain@v1 # Set up the Rust toolchain
         with:
-          toolchain: stable
+          toolchain: stable # Use the stable Rust toolchain for compatibility
 
       - name: Build project
-        run: cargo build --release
+        run: cargo build --release # Build the project in release mode to ensure optimized binaries
 
       - name: Run tests
-        run: cargo test
+        run: cargo test # Run the test suite to verify functionality and correctness

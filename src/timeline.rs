@@ -1,17 +1,19 @@
 use serde::{Serialize, Deserialize};
-use crate::synthesizer::Waveform; // Import Waveform
+use crate::synthesizer::Waveform; // Import Waveform for clip waveform type
 
+/// Represents the timeline of the audio project, containing multiple audio clips.
 #[derive(Serialize, Deserialize)]
 pub struct Timeline {
-    pub clips: Vec<Clip>,
+    pub clips: Vec<Clip>, // List of audio clips in the timeline
 }
 
+/// Represents an individual audio clip in the timeline.
 #[derive(Serialize, Deserialize)]
 pub struct Clip {
-    pub id: String,
-    pub start_time: f32,
-    pub duration: f32,
-    pub frequency: f32,
-    pub amplitude: f32,
-    pub waveform: Waveform, // Use imported Waveform
+    pub id: String,        // Unique identifier for the clip
+    pub start_time: f32,   // Start time of the clip in seconds
+    pub duration: f32,     // Duration of the clip in seconds
+    pub frequency: f32,    // Frequency of the waveform in the clip
+    pub amplitude: f32,    // Amplitude of the waveform in the clip
+    pub waveform: Waveform, // Waveform type (e.g., Sine, Square)
 }

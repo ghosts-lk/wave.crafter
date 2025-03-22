@@ -1,26 +1,27 @@
 use std::f32::consts::PI;
 use hound;
 use serde::{Serialize, Deserialize};
-use crate::mixer::Mixer;
-use rayon::prelude::*; // Add Rayon for parallelism
+use crate::mixer::Mixer; // Import Mixer for track mixing
+use rayon::prelude::*;   // Import Rayon for parallel processing
+use crate::effects::Effects as AudioEffects; // Rename Effects to avoid conflicts
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Waveform {
-    Sine,
-    Square,
-    Triangle,
-    Sawtooth,
+    Sine,      // Sine wave
+    Square,    // Square wave
+    Triangle,  // Triangle wave
+    Sawtooth,  // Sawtooth wave
 }
 
 pub struct Synthesizer {
-    pub frequency_left: f32,
-    pub frequency_right: f32,
-    pub amplitude: f32,
-    pub waveform: Waveform,
-    pub tracks: Vec<Track>,
-    pub effects: Effects,
-    pub timeline: Timeline,
-    pub mixer: Mixer,
+    pub frequency_left: f32,  // Frequency for the left channel
+    pub frequency_right: f32, // Frequency for the right channel
+    pub amplitude: f32,       // Amplitude of the waveform
+    pub waveform: Waveform,   // Current waveform type
+    pub tracks: Vec<Track>,   // List of audio tracks
+    pub effects: AudioEffects, // Audio effects (e.g., delay, reverb)
+    pub timeline: Timeline,   // Timeline for managing audio clips
+    pub mixer: Mixer,         // Mixer for combining tracks
 }
 
 impl Synthesizer {
@@ -31,32 +32,36 @@ impl Synthesizer {
             frequency_right: frequency,
             amplitude,
             waveform,
-            tracks: Vec::new(),
-            effects: Effects { delay: 0.0 },
-            timeline: Timeline { clips: Vec::new() },
-            mixer: Mixer::new(),
+            tracks: Vec::new(), // Initialize with no tracks
+            effects: AudioEffects { delay: 0.0, reverb: 0.0 }, // Default effects
+            timeline: Timeline { clips: Vec::new() }, // Empty timeline
+            mixer: Mixer::new(), // Initialize mixer
         }
     }
 
+    /// Generates a single audio sample for the given time and channel (left or right).
+    /// 
+    /// # Parameters
+    /// - `time`: The time at which the sample is generated.
+    /// - `is_left`: Whether the sample is for the left channel.
+    /// 
+    /// # Returns
+    /// - The generated audio sample.
     pub fn generate_sample(&self, time: f32, is_left: bool) -> f32 {
         let frequency = if is_left {
-            self.frequency_left
+            self.frequency_left // Use left channel frequency
         } else {
-            self.frequency_right
+            self.frequency_right // Use right channel frequency
         };
-        let phase = 2.0 * PI * frequency * time;
+        let phase = 2.0 * PI * frequency * time; // Calculate phase
         return (match self.waveform {
-            Waveform::Sine => phase.sin(),
+            Waveform::Sine => phase.sin(), // Generate sine wave
             Waveform::Square => {
-                if phase.sin() >= 0.0 {
-                    return 1.0; // Add explicit return
-                } else {
-                    return -1.0; // Add explicit return
-                }
+                if phase.sin() >= 0.0 { 1.0 } else { -1.0 } // Generate square wave
             }
-            Waveform::Triangle => 2.0 * (2.0 * frequency * time - (2.0 * frequency * time).floor() - 0.5).abs() - 1.0,
-            Waveform::Sawtooth => 2.0 * (frequency * time - (frequency * time).floor()) - 1.0,
-        }) * self.amplitude; // Add parentheses to fix dereferencing issue
+            Waveform::Triangle => 2.0 * (2.0 * frequency * time - (2.0 * frequency * time).floor() - 0.5).abs() - 1.0, // Generate triangle wave
+            Waveform::Sawtooth => 2.0 * (frequency * time - (frequency * time).floor()) - 1.0, // Generate sawtooth wave
+        }) * self.amplitude; // Scale by amplitude
     }
 
     pub fn set_amplitude(&mut self, amplitude: f32) {
@@ -83,6 +88,7 @@ impl Synthesizer {
     pub fn set_effect(&mut self, effect: &str, value: f32) {
         match effect {
             "delay" => self.effects.delay = value,
+            "reverb" => self.effects.reverb = value, // Add handling for reverb
             _ => println!("Unknown effect: {}", effect),
         }
     }
@@ -149,7 +155,7 @@ impl Synthesizer {
 
     pub fn apply_effects(&mut self, time: f32) -> f32 {
         let mut sample = self.generate_timeline_sample(time);
-        sample += self.effects.delay * 0.01;
+        sample = self.effects.apply(sample); // Use the apply method from AudioEffects
         sample
     }
 
@@ -169,10 +175,6 @@ pub struct Track {
     pub id: String,
     pub volume: f32,
     pub muted: bool,
-}
-
-pub struct Effects {
-    pub delay: f32,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
