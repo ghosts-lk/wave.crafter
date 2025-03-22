@@ -1,7 +1,6 @@
-# Logs
-logs/
-*.log
-
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# Rust build artifacts
+target/

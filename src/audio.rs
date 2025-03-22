@@ -1,6 +1,6 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use rustfft::{FftPlanner, num_complex::Complex};
-use plotters::prelude::*; // Fixed import
+use plotters::prelude::*;
 use std::sync::{Arc, Mutex};
 use crate::synthesizer::Synthesizer;
 
@@ -18,9 +18,11 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
             move |data: &mut [f32], _| {
                 let synth = synth.lock().unwrap();
                 for sample in data.iter_mut() {
-                    *sample = synth.generate_sample(0.0, true); // Generate audio samples
+                    *sample = synth.generate_sample(0.0, true);
                 }
-                generate_spectrogram(data).unwrap(); // Generate spectrogram in real-time
+                if let Err(e) = generate_spectrogram(data) {
+                    eprintln!("Spectrogram generation error: {}", e);
+                }
             },
             |err| eprintln!("Stream error: {}", err),
             None,
@@ -29,23 +31,20 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
     };
 
     stream.play()?;
-    std::thread::park(); // Keep the thread alive
+    std::thread::park();
     Ok(())
 }
 
 pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::Error>> {
-    // Perform FFT on the samples
     let mut planner = FftPlanner::new();
     let fft = planner.plan_fft_forward(samples.len());
     let mut buffer: Vec<Complex<f32>> = samples.iter().map(|&s| Complex { re: s, im: 0.0 }).collect();
     fft.process(&mut buffer);
 
-    // Compute magnitudes
     let magnitudes: Vec<f32> = buffer.iter().map(|c| c.norm()).collect();
 
-    // Render the spectrogram
     let root = BitMapBackend::new("spectrogram.png", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?; // Fixed undefined constant
+    root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .caption("Spectrogram", ("sans-serif", 30))
         .margin(10)
@@ -54,9 +53,9 @@ pub fn generate_spectrogram(samples: &[f32]) -> Result<(), Box<dyn std::error::E
         .build_cartesian_2d(0..magnitudes.len(), 0.0..magnitudes.iter().cloned().fold(0.0, f32::max))?;
 
     chart.configure_mesh().draw()?;
-    chart.draw_series(LineSeries::new( // Fixed undefined type
+    chart.draw_series(LineSeries::new(
         magnitudes.iter().enumerate().map(|(x, &y)| (x, y)),
-        &BLUE, // Fixed undefined constant
+        &BLUE,
     ))?;
 
     root.present()?;
