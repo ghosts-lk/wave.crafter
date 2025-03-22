@@ -28,7 +28,7 @@ struct WaveCrafterApp {
 impl eframe::App for WaveCrafterApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("🎵 Wave Crafter");
+            ui.heading("🎵 WaveCraft - Digital Audio Workstation");
             ui.separator();
 
             let mut synth = self.synth.lock().unwrap();
@@ -70,77 +70,64 @@ impl eframe::App for WaveCrafterApp {
 
             ui.separator();
 
-            // Track Management
+            // Add advanced track management
             ui.heading("Tracks");
             if ui.button("Add Track").clicked() {
-                println!("Adding a new track...");
                 synth.add_track("New Track");
             }
 
-            for track in &synth.tracks {
+            for track in &mut synth.tracks {
                 ui.horizontal(|ui| {
                     ui.label(&track.id);
                     let mut volume = track.volume;
                     if ui.add(egui::Slider::new(&mut volume, 0.0..=1.0)).changed() {
-                        println!("Volume for {} set to {}", track.id, volume);
+                        track.volume = volume;
                     }
                     if ui.button("Mute").clicked() {
-                        println!("Muted {}", track.id);
+                        track.muted = !track.muted;
                     }
                 });
             }
 
-            ui.separator();
+            // Add timeline visualization
             ui.heading("Timeline");
-            // Effects
-            ui.heading("Effects");
-            ui.horizontal(|ui| {
-                ui.label("Reverb:");
-                let mut reverb = synth.effects.reverb;
-                if ui.add(egui::Slider::new(&mut reverb, 0.0..=100.0)).changed() {
-                    synth.set_effect("reverb", reverb);
-                }
-            });
-            ui.horizontal(|ui| {
-                ui.label("Delay:");
-                let mut delay = synth.effects.delay;
-                if ui.add(egui::Slider::new(&mut delay, 0.0..=100.0)).changed() {
-                    synth.set_effect("delay", delay);
-                }
-            });
-
             for clip in &mut synth.timeline.clips {
                 ui.horizontal(|ui| {
                     ui.label(&clip.id);
-                    ui.add(egui::Slider::new(&mut clip.start_time, 0.0..=10.0).text("Start Time"));
-                    ui.add(egui::Slider::new(&mut clip.duration, 0.1..=5.0).text("Duration"));
+                    ui.add(egui::Slider::new(&mut clip.start_time, 0.0..=60.0).text("Start Time"));
+                    ui.add(egui::Slider::new(&mut clip.duration, 0.1..=10.0).text("Duration"));
                     if ui.button("Remove").clicked() {
                         synth.timeline.remove_clip(&clip.id);
                     }
                 });
             }
 
-            ui.separator();
-
-            // Effects
+            // Add effect chains
             ui.heading("Effects");
             ui.horizontal(|ui| {
                 ui.label("Reverb:");
                 let mut reverb = synth.effects.reverb;
                 if ui.add(egui::Slider::new(&mut reverb, 0.0..=100.0)).changed() {
-                    synth.set_effect("reverb", reverb);
+                    synth.effects.reverb = reverb;
                 }
             });
             ui.horizontal(|ui| {
                 ui.label("Delay:");
                 let mut delay = synth.effects.delay;
                 if ui.add(egui::Slider::new(&mut delay, 0.0..=100.0)).changed() {
-                    synth.set_effect("delay", delay);
+                    synth.effects.delay = delay;
                 }
             });
 
             ui.separator();
             ui.heading("Project");
+
+            // Add export functionality
+            if ui.button("💾 Export Project").clicked() {
+                if let Err(e) = synth.save_project("project.json") {
+                    eprintln!("Failed to save project: {}", e);
+                }
+            }
 
             if ui.button("💾 Export Audio").clicked() {
                 println!("Exporting audio...");

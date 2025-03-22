@@ -18,26 +18,7 @@ pub struct Synthesizer {
     pub tracks: Vec<Track>, // Added for track management
     pub effects: Effects,  // Added for effects
     pub timeline: Timeline, // Added timeline
-}
-
-pub struct Track {
-    pub id: String,
-    pub volume: f32,
-    pub muted: bool,
-}
-
-pub struct Effects {
-    pub delay: f32,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct AudioClip {
-    // ...existing code...
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Timeline {
-    // ...existing code...
+    pub mixer: Mixer, // Added mixer for track blending
 }
 
 impl Synthesizer {
@@ -50,6 +31,7 @@ impl Synthesizer {
             tracks: Vec::new(), // Initialize tracks
             effects: Effects { delay: 0.0 }, // Initialize effects
             timeline: Timeline { clips: Vec::new() }, // Initialize timeline
+            mixer: Mixer { tracks: Vec::new() }, // Initialize mixer
         }
     }
 
@@ -60,12 +42,18 @@ impl Synthesizer {
             self.frequency_right
         };
         let phase = 2.0 * PI * frequency * time;
-        match self.waveform {
+        return match self.waveform {
             Waveform::Sine => phase.sin(),
-            Waveform::Square => if phase.sin() >= 0.0 { 1.0 } else { -1.0 },
+            Waveform::Square => {
+                if phase.sin() >= 0.0 {
+                    return 1.0;
+                } else {
+                    return -1.0;
+                }
+            }
             Waveform::Triangle => 2.0 * (2.0 * frequency * time - (2.0 * frequency * time).floor() - 0.5).abs() - 1.0,
             Waveform::Sawtooth => 2.0 * (frequency * time - (frequency * time).floor()) - 1.0,
-        } * self.amplitude
+        } * self.amplitude;
     }
 
     pub fn set_amplitude(&mut self, amplitude: f32) {
@@ -143,5 +131,43 @@ impl Synthesizer {
         let json = std::fs::read_to_string(filename)?;
         self.timeline = serde_json::from_str(&json)?;
         Ok(())
+    }
+}
+
+pub struct Track {
+    pub id: String,
+    pub volume: f32,
+    pub muted: bool,
+}
+
+pub struct Effects {
+    pub delay: f32,
+}
+
+#[derive(Serialize, Deserialize, Clone)] // Added Serialize and Deserialize
+pub struct Clip {
+    pub id: String,
+    pub start_time: f32,
+    pub duration: f32,
+    pub frequency: f32,
+    pub amplitude: f32,
+    pub waveform: Waveform,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct AudioClip {
+    // ...existing code...
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Timeline {
+    pub clips: Vec<Clip>, // Add the missing `clips` field
+    // ...existing code...
+}
+
+impl Timeline {
+    // Add the `remove_clip` method
+    pub fn remove_clip(&mut self, clip_id: &str) {
+        self.clips.retain(|clip| clip.id != clip_id);
     }
 }
