@@ -28,6 +28,12 @@ jobs:
             libgdk-pixbuf2.0-dev \
             libgtk-3-dev # Install all required system dependencies
 
+      - name: Install JACK dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libjack-jackd2-dev pkg-config
+          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
+
       - name: Cache Cargo registry
         uses: actions/cache@v3
         with:
