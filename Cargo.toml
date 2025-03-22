@@ -1,0 +1,9 @@
+[package]
+name = "wave_crafter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cpal = "0.15" # For audio output
+eframe = "0.20" # For GUI framework
+egui = "0.20" # For GUI components
