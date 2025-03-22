@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-cpal = "0.15" # For audio output
+cpal = { version = "0.15", features = ["host-trait", "stream-trait", "device-trait"] } # For audio output
 eframe = "0.20" # For GUI framework
 egui = "0.20" # For GUI components

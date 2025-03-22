@@ -1,5 +1,6 @@
 use crate::synthesizer::{Synthesizer, Waveform};
 use std::sync::{Arc, Mutex};
+use egui::plot::{Line, PlotPoints}; // Correct import for `Values` equivalent in `egui`
 
 pub struct SynthesizerApp {
     synthesizer: Arc<Mutex<Synthesizer>>,
@@ -13,12 +14,17 @@ impl SynthesizerApp {
     pub fn new(synthesizer: Arc<Mutex<Synthesizer>>) -> Self {
         let synth = synthesizer.lock().unwrap();
         Self {
-            synthesizer,
+            synthesizer: synthesizer.clone(), // Clone instead of moving
             frequency: synth.frequency,
             amplitude: synth.amplitude,
             waveform: synth.waveform,
             preset: String::new(),
         }
+    }
+
+    pub fn render(&self, ui: &mut egui::Ui) {
+        let points: PlotPoints = /* ...generate points... */;
+        ui.add(Line::new(points)); // Use `PlotPoints` instead of `Values`
     }
 }
 
@@ -103,7 +109,7 @@ impl eframe::App for SynthesizerApp {
                         [t, self.synthesizer.lock().unwrap().generate_sample(t)]
                     })
                     .collect();
-                ui.add(egui::plot::Line::new(egui::plot::Values::from_values(points)));
+                ui.add(Line::new(PlotPoints::from(points))); // Use `PlotPoints` instead of `Values`
             });
         });
     }

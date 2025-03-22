@@ -6,6 +6,7 @@ use eframe::egui;
 use synthesizer::{Synthesizer, Waveform};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait}; // Add missing imports
 
 fn main() {
     let synthesizer = Arc::new(Mutex::new(Synthesizer::new(440.0, 0.5, Waveform::Sine)));

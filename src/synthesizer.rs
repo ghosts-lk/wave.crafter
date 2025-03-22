@@ -34,10 +34,11 @@ impl Synthesizer {
                 }
             }
             Waveform::Triangle => {
-                2.0 * (2.0 * self.frequency * time - (2.0 * self.frequency * time).floor() - 0.5).abs()
-                    - 1.0
+                2.0 * (2.0 * self.frequency * time - (2.0 * self.frequency * time).floor() - 0.5).abs() - 1.0
             }
-            Waveform::Sawtooth => 2.0 * (self.frequency * time - (self.frequency * time).floor()) - 1.0,
+            Waveform::Sawtooth => {
+                2.0 * (self.frequency * time - (self.frequency * time).floor()) - 1.0
+            }
         } * self.amplitude
     }
 
