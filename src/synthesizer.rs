@@ -3,7 +3,7 @@ use hound;
 use serde::{Serialize, Deserialize};
 use crate::mixer::Mixer; // Import Mixer for track mixing
 use rayon::prelude::*;   // Import Rayon for parallel processing
-use crate::effects::Effects as AudioEffects; // Correctly reference the effects module
+use crate::effects::Effects; // Use a relative path to the effects module
 
 #[derive(Clone, Copy, PartialEq, Debug, Serialize, Deserialize)]
 pub enum Waveform {
@@ -19,7 +19,7 @@ pub struct Synthesizer {
     pub amplitude: f32,       // Amplitude of the waveform
     pub waveform: Waveform,   // Current waveform type
     pub tracks: Vec<Track>,   // List of audio tracks
-    pub effects: AudioEffects, // Audio effects (e.g., delay, reverb)
+    pub effects: Effects, // Audio effects (e.g., delay, reverb)
     pub timeline: Timeline,   // Timeline for managing audio clips
     pub mixer: Mixer,         // Mixer for combining tracks
 }
@@ -33,7 +33,7 @@ impl Synthesizer {
             amplitude,
             waveform,
             tracks: Vec::new(), // Initialize with no tracks
-            effects: AudioEffects { delay: 0.0, reverb: 0.0 }, // Default effects
+            effects: Effects { delay: 0.0, reverb: 0.0 }, // Default effects
             timeline: Timeline { clips: Vec::new() }, // Empty timeline
             mixer: Mixer::new(), // Initialize mixer
         }
@@ -91,7 +91,7 @@ impl Synthesizer {
         match effect {
             "delay" => self.effects.delay = value,
             "reverb" => self.effects.reverb = value, // Add handling for reverb
-            _ => println!("Unknown effect: {}", effect),
+            _ => eprintln!("Unknown effect: {}", effect), // Log unknown effects
         }
     }
 
@@ -139,10 +139,10 @@ impl Synthesizer {
                     Waveform::Sawtooth => 2.0 * (clip.frequency * (time - clip.start_time) - (clip.frequency * (time - clip.start_time)).floor()) - 1.0,
                 } * clip.amplitude;
 
-                sample += self.effects.apply(raw_sample); // Apply effects to each clip's sample
+                sample += raw_sample; // Sum raw samples without applying effects here
             }
         }
-        sample
+        self.effects.apply(sample) // Apply effects to the combined sample
     }
 
     pub fn save_project(&self, filename: &str) -> Result<(), std::io::Error> {
@@ -158,9 +158,7 @@ impl Synthesizer {
     }
 
     pub fn apply_effects(&mut self, time: f32) -> f32 {
-        let mut sample = self.generate_timeline_sample(time);
-        sample = self.effects.apply(sample); // Use the apply method from AudioEffects
-        sample
+        self.effects.apply(self.generate_timeline_sample(time)) // Simplify effect application
     }
 
     pub fn update_effect(&mut self, effect: &str, value: f32) {
@@ -168,9 +166,9 @@ impl Synthesizer {
     }
 
     pub fn generate_mixed_sample(&self, time: f32) -> f32 {
-        let base_sample = self.generate_timeline_sample(time);
-        let mixed_sample = self.mixer.apply_mixing(time);
-        base_sample + mixed_sample
+        let base_sample = self.generate_timeline_sample(time); // Generate timeline sample
+        let mixed_sample = self.mixer.apply_mixing(time); // Apply mixing
+        base_sample + mixed_sample // Combine base and mixed samples
     }
 }
 

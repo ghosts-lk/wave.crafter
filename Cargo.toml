@@ -7,20 +7,24 @@ license = "MIT"
 repository = "https://github.com/your-repo/wave.crafter"
 
 [dependencies]
-cpal = "0.15"            # For audio playback
-eframe = "0.22"          # For GUI framework
-egui = "0.22"            # For GUI components
-serde = { version = "1.0", features = ["derive"] } # For serialization/deserialization
-serde_json = "1.0"       # For JSON handling
-hound = "3.4.0"          # For WAV file handling
-plotters = "0.3"         # For spectrogram generation
-rustfft = "6.0"          # For FFT processing
-gtk = "0.18"             # For GTK-based UI
-glib = "0.18"            # For GLib utilities
-tokio = { version = "1", features = ["full"] } # For async runtime
-rayon = "1.7"            # For parallel processing
-crossbeam = "0.8"        # For thread-safe communication
-crossbeam-channel = "0.5" # For thread-safe channels
+cpal = { version = "0.15", features = ["jack"] } # Add "jack" feature for better audio support
+eframe = "0.22"          # GUI framework for native applications
+egui = "0.22"            # GUI components for eframe
+serde = { version = "1.0", features = ["derive"] } # Serialization/deserialization
+serde_json = "1.0"       # JSON handling
+hound = "3.4.0"          # WAV file handling
+plotters = { version = "0.3", features = ["bitmap_backend"] } # Spectrogram generation
+rustfft = "6.0"          # FFT processing
+gtk = "0.18"             # GTK-based UI
+glib = "0.18"            # GLib utilities
+tokio = { version = "1", features = ["full"] } # Async runtime
+rayon = "1.7"            # Parallel processing
+crossbeam = "0.8"        # Thread-safe communication
+crossbeam-channel = "0.5" # Thread-safe channels
+
+[dev-dependencies]
+assert_cmd = "2.0"       # Integration testing
+tempfile = "3.3"         # Temporary file handling in tests
 
 [package.metadata.bundle]
 name = "Wave Crafter"

@@ -7,6 +7,15 @@ pub struct Timeline {
     pub clips: Vec<Clip>, // List of audio clips in the timeline
 }
 
+impl Timeline {
+    /// Creates a new, empty timeline.
+    pub fn new() -> Self {
+        Timeline {
+            clips: Vec::new(), // Initialize with no clips
+        }
+    }
+}
+
 /// Represents an individual audio clip in the timeline.
 #[derive(Serialize, Deserialize)]
 pub struct Clip {

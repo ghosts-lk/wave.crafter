@@ -3,9 +3,19 @@
 Thumbs.db
 
 # Rust build artifacts
-target/
+/target/
+**/*.rs.bk
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
 
 # Bundled executables
 *.exe
 *.app
 *.deb
+
+# Logs
+*.log

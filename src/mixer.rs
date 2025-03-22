@@ -15,7 +15,8 @@ impl Mixer {
         let mut mixed_sample = 0.0;
         for track in &self.tracks {
             if !track.muted {
-                let raw_sample = track.volume * time.sin(); // Adjust mixing logic
+                // Generate a sine wave sample for the track and scale by volume
+                let raw_sample = track.volume * (2.0 * std::f32::consts::PI * time).sin();
                 mixed_sample += raw_sample; // Sum raw samples
             }
         }
@@ -24,5 +25,16 @@ impl Mixer {
 
     pub fn apply_mixing(&self, time: f32) -> f32 {
         self.mix_tracks(time) // Use `mix_tracks`
+    }
+}
+
+impl Track {
+    /// Creates a new track with default values.
+    pub fn new(id: &str) -> Self {
+        Track {
+            id: id.to_string(),
+            volume: 0.5, // Default volume
+            muted: false, // Default muted state
+        }
     }
 }

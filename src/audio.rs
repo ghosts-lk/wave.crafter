@@ -20,7 +20,13 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
         let mut time = 0.0; // Initialize time for sample generation
         let time_step = 1.0 / config.sample_rate.0 as f32; // Calculate the time step based on the sample rate
         loop {
-            let synth = synth_clone.lock().unwrap(); // Lock the synthesizer for thread-safe access
+            let synth = match synth_clone.lock() {
+                Ok(s) => s, // Lock the synthesizer for thread-safe access
+                Err(e) => {
+                    eprintln!("Synthesizer lock error: {}", e);
+                    return;
+                }
+            };
             for _ in 0..1024 {
                 let sample = synth.generate_mixed_sample(time); // Generate a mixed audio sample
                 if sender.send(sample).is_err() {
@@ -41,6 +47,26 @@ pub fn play_audio(synth: Arc<Mutex<Synthesizer>>) -> Result<(), Box<dyn std::err
                 }
             },
             |err| eprintln!("Stream error: {}", err), // Handle stream errors
+            None,
+        )?,
+        cpal::SampleFormat::I16 => device.build_output_stream(
+            &config,
+            move |data: &mut [i16], _| {
+                for sample in data.iter_mut() {
+                    *sample = (receiver.recv().unwrap_or(0.0) * i16::MAX as f32) as i16; // Convert to i16
+                }
+            },
+            |err| eprintln!("Stream error: {}", err),
+            None,
+        )?,
+        cpal::SampleFormat::U16 => device.build_output_stream(
+            &config,
+            move |data: &mut [u16], _| {
+                for sample in data.iter_mut() {
+                    *sample = ((receiver.recv().unwrap_or(0.0) + 1.0) * 0.5 * u16::MAX as f32) as u16; // Convert to u16
+                }
+            },
+            |err| eprintln!("Stream error: {}", err),
             None,
         )?,
         _ => return Err("Unsupported stream format".into()), // Handle unsupported formats

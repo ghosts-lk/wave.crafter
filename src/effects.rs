@@ -11,11 +11,15 @@ impl Effects {
     /// 
     /// # Returns
     /// - The modified audio sample after applying the effects.
+    ///
+    /// # Notes
+    /// - The reverb effect is simplified as a scaled version of the sample. In a real-world implementation, the reverb effect would be more complex, e.g. using a digital signal processing algorithm.
+    /// - The delay effect is also simplified as a scaled version of the sample. In a real-world implementation, the delay effect would use a circular buffer to store the audio samples and then read them back with a delay.
     pub fn apply(&self, sample: f32) -> f32 {
-        // Calculate reverb effect (simplified as a scaled version of the sample)
+        // Apply the reverb effect (simplified as a scaled version of the sample)
         let reverb_effect = sample * self.reverb * 0.1;
 
-        // Calculate delay effect (simplified as a scaled version of the sample)
+        // Apply the delay effect (simplified as a scaled version of the sample)
         let delay_effect = sample * self.delay * 0.01;
 
         // Combine the original sample with the effects

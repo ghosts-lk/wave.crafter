@@ -1,73 +1,56 @@
-# WaveCraft
+# Wave Crafter
 
-## Overview
-WaveCraft is a Rust-based digital audio workstation (DAW) and synthesizer that allows users to create, mix, and export audio tracks. It features real-time waveform generation, timeline editing, and audio effects.
+Wave Crafter is a digital audio workstation (DAW) built with Rust and Egui. It allows users to create, edit, and export audio tracks with various effects and features.
 
 ## Features
-- **Real-time waveform rendering**: Visualize waveforms as you adjust parameters.
-- **Binaural audio support**: Generate stereo audio with independent left and right frequencies.
-- **Track management**: Add, mute, and adjust volume for multiple tracks.
-- **Timeline editing**: Add and manage audio clips with customizable start times, durations, and waveforms.
-- **Audio effects**: Apply effects like delay and reverb to your audio.
-- **Spectrogram generation**: Visualize the frequency spectrum of audio samples.
-- **Export functionality**: Save projects and export audio to WAV format.
+- Frequency and amplitude control
+- Waveform selection (Sine, Square, Triangle, Sawtooth)
+- Track management (Add, adjust volume, mute)
+- Timeline visualization and clip management
+- Audio effects (e.g., delay)
+- Project export and import
+- Audio export to WAV format
 
-## Performance Specifications
-- **Audio Sample Rate**: 44.1 kHz
-- **Latency**: Optimized for low-latency audio playback using `cpal`.
-- **Parallel Processing**: Utilizes `rayon` for parallel sample generation, ensuring efficient performance on multi-core systems.
-- **Memory Usage**: Designed to handle large audio projects with minimal memory overhead.
-- **Export Speed**: Exports 5-minute audio tracks in under 10 seconds on modern hardware.
+## Hardware Requirements
+To run Wave Crafter smoothly, ensure your system meets the following minimum requirements:
+- **Processor**: Dual-core CPU (2 GHz or faster)
+- **Memory**: 4 GB RAM
+- **Storage**: 500 MB of free disk space
+- **Audio**: Sound card with JACK support
+- **Operating System**: Linux (Debian/Ubuntu recommended)
+- **Graphics**: OpenGL 3.3 compatible GPU
 
-## Requirements
-- Rust (latest stable version)
-- `cargo-bundle` for packaging (install with `cargo install cargo-bundle`)
-- System dependencies for GTK:
-  ```bash
-  sudo apt-get update
-  sudo apt-get install -y libfontconfig1-dev libglib2.0-dev
-  ```
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/wave.crafter.git
+   cd wave.crafter
+   ```
 
-## Instructions
+2. Install dependencies:
+   - Ensure you have Rust installed. If not, install it from [rustup.rs](https://rustup.rs/).
+   - Install the JACK audio library:
+     ```bash
+     sudo apt-get install libjack-jackd2-dev  # For Debian/Ubuntu
+     ```
 
-### Clone the Repository
-```bash
-git clone https://github.com/your-repo/wave.crafter.git
-cd wave.crafter
-```
+3. Build and run the application:
+   ```bash
+   cargo run --release
+   ```
 
-### Build the Project
-```bash
-cargo build --release
-```
-
-### Run the Application
-```bash
-cargo run --release
-```
-
-### Export Audio
-Export audio to a WAV file:
-```bash
-cargo run --release -- export
-```
-
-### Generate Spectrogram
-Generate a spectrogram image:
-```bash
-cargo run --release -- spectrogram
-```
-
-### Package the Application
-Create a standalone executable:
-```bash
-cargo bundle
-```
-
-> **Note**: Ensure the `assets/icon.png` file exists for packaging.
+## Usage
+- Adjust frequency and amplitude sliders to modify the sound.
+- Select a waveform to change the audio signal shape.
+- Add and manage tracks, clips, and effects.
+- Export projects and audio files for later use.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
-Contributions are welcome! Feel free to open issues or submit pull requests.
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## Acknowledgments
+- Built with [Egui](https://github.com/emilk/egui) for the UI.
+- Inspired by digital audio workstations like Audacity and FL Studio.
