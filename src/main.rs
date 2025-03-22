@@ -8,25 +8,9 @@ use std::thread;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
 /// Entry point of the application
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a shared synthesizer instance
-    let synthesizer = Arc::new(Mutex::new(Synthesizer::new(440.0, 0.5, Waveform::Sine)));
-
-    // Spawn a thread for audio playback
-    let synth_clone = synthesizer.clone();
-    thread::spawn(move || {
-        start_audio(synth_clone);
-    });
-
-    // Start the GUI
-    let options = eframe::NativeOptions::default();
-    eframe::run_native(
-        "Synthesizer UI",
-        options,
-        Box::new(|_cc| Box::new(ui::SynthesizerApp::new(synthesizer))),
-    );
-
-    Ok(())
+fn main() -> Result<(), eframe::Error> {
+    let synth = Arc::new(Mutex::new(Synthesizer::new(440.0, 0.5, Waveform::Sine)));
+    ui::run_ui(synth)
 }
 
 /// Starts the audio playback thread
@@ -74,9 +58,10 @@ where
         config,
         move |data: &mut [T], _: &cpal::OutputCallbackInfo| {
             let synthesizer = synthesizer.lock().unwrap();
+            let max_amplitude = i16::MAX as f32;
             for frame in data.chunks_mut(channels) {
-                let left_value: f32 = synthesizer.generate_sample(time, true);
-                let right_value: f32 = synthesizer.generate_sample(time, false);
+                let left_value = synthesizer.generate_sample(time, true) / max_amplitude;
+                let right_value = synthesizer.generate_sample(time, false) / max_amplitude;
                 time += time_step;
                 let left_sample: T = T::from_sample(left_value);
                 let right_sample: T = T::from_sample(right_value);

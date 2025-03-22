@@ -1,6 +1,3 @@
-use crate::synthesizer::{Synthesizer, Waveform};
-use std::sync::{Arc, Mutex};
-
 /*
 pub fn handle_user_input(synth: Arc<Mutex<Synthesizer>>) {
     loop {
@@ -56,5 +53,12 @@ pub fn handle_user_input(synth: Arc<Mutex<Synthesizer>>) {
             println!("Unknown command.");
         }
     }
+}
+*/
+
+/*
+pub fn lock_spectrogram() {
+    println!("Spectrogram interaction locked.");
+    // Add logic to disable mouse interaction with the spectrogram
 }
 */

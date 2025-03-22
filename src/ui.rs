@@ -1,151 +1,99 @@
-use crate::synthesizer::{Synthesizer, Waveform};
+use eframe::egui;
 use std::sync::{Arc, Mutex};
-use egui::plot::{Line, Plot, PlotPoints};
+use crate::synthesizer::{Synthesizer, Waveform};
+use rfd::FileDialog;
 
-pub struct SynthesizerApp {
-    synthesizer: Arc<Mutex<Synthesizer>>,
-    frequency_left: f32,
-    frequency_right: f32, // Added for binaural audio
-    amplitude: f32,
-    waveform: Waveform,
-    preset: String,
-    paused: bool,
+pub fn run_ui(synth: Arc<Mutex<Synthesizer>>) -> Result<(), eframe::Error> {
+    let options = eframe::NativeOptions::default();
+    eframe::run_native(
+        "Wave Crafter",
+        options,
+        Box::new(|_cc| Box::new(WaveCrafterApp { synth })),
+    )
 }
 
-impl SynthesizerApp {
-    pub fn new(synthesizer: Arc<Mutex<Synthesizer>>) -> Self {
-        let synth = synthesizer.lock().unwrap();
-        Self {
-            synthesizer: synthesizer.clone(),
-            frequency_left: synth.frequency_left,
-            frequency_right: synth.frequency_right, // Initialize right frequency
-            amplitude: synth.amplitude,
-            waveform: synth.waveform,
-            preset: String::new(),
-            paused: false,
-        }
-    }
+struct WaveCrafterApp {
+    synth: Arc<Mutex<Synthesizer>>,
 }
 
-impl eframe::App for SynthesizerApp {
+impl eframe::App for WaveCrafterApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Synthesizer Controls");
+            ui.heading("🎵 Wave Crafter");
+            ui.separator();
 
-            // Frequency sliders for binaural audio
+            let mut synth = self.synth.lock().unwrap();
+
+            // Frequency Slider
             ui.horizontal(|ui| {
-                ui.label("Left Frequency (Hz):");
-                if ui
-                    .add(egui::Slider::new(&mut self.frequency_left, 20.0..=2000.0))
-                    .changed()
-                {
-                    self.synthesizer
-                        .lock()
-                        .unwrap()
-                        .set_binaural_frequencies(self.frequency_left, self.frequency_right);
-                }
-            });
-            ui.horizontal(|ui| {
-                ui.label("Right Frequency (Hz):");
-                if ui
-                    .add(egui::Slider::new(&mut self.frequency_right, 20.0..=2000.0))
-                    .changed()
-                {
-                    self.synthesizer
-                        .lock()
-                        .unwrap()
-                        .set_binaural_frequencies(self.frequency_left, self.frequency_right);
+                ui.label("Frequency (Hz):");
+                let mut freq = synth.frequency_left;
+                if ui.add(egui::Slider::new(&mut freq, 20.0..=20000.0)).changed() {
+                    synth.set_binaural_frequencies(freq, freq);
                 }
             });
 
-            // Amplitude slider
+            // Amplitude Slider
             ui.horizontal(|ui| {
                 ui.label("Amplitude:");
-                if ui
-                    .add(egui::Slider::new(&mut self.amplitude, 0.0..=1.0))
-                    .changed()
-                {
-                    self.synthesizer
-                        .lock()
-                        .unwrap()
-                        .set_amplitude(self.amplitude);
+                let mut amp = synth.amplitude;
+                if ui.add(egui::Slider::new(&mut amp, 0.0..=1.0)).changed() {
+                    synth.set_amplitude(amp);
                 }
             });
 
-            // Waveform selection
+            // Waveform Selector
             ui.horizontal(|ui| {
                 ui.label("Waveform:");
-                if ui
-                    .radio_value(&mut self.waveform, Waveform::Sine, "Sine")
-                    .clicked()
-                {
-                    self.synthesizer.lock().unwrap().set_waveform(Waveform::Sine);
+                if ui.selectable_label(synth.waveform == Waveform::Sine, "🎵 Sine").clicked() {
+                    synth.set_waveform(Waveform::Sine);
                 }
-                if ui
-                    .radio_value(&mut self.waveform, Waveform::Square, "Square")
-                    .clicked()
-                {
-                    self.synthesizer.lock().unwrap().set_waveform(Waveform::Square);
+                if ui.selectable_label(synth.waveform == Waveform::Square, "⬛ Square").clicked() {
+                    synth.set_waveform(Waveform::Square);
                 }
-                if ui
-                    .radio_value(&mut self.waveform, Waveform::Triangle, "Triangle")
-                    .clicked()
-                {
-                    self.synthesizer.lock().unwrap().set_waveform(Waveform::Triangle);
+                if ui.selectable_label(synth.waveform == Waveform::Triangle, "🔺 Triangle").clicked() {
+                    synth.set_waveform(Waveform::Triangle);
                 }
-                if ui
-                    .radio_value(&mut self.waveform, Waveform::Sawtooth, "Sawtooth")
-                    .clicked()
-                {
-                    self.synthesizer.lock().unwrap().set_waveform(Waveform::Sawtooth);
+                if ui.selectable_label(synth.waveform == Waveform::Sawtooth, "📐 Sawtooth").clicked() {
+                    synth.set_waveform(Waveform::Sawtooth);
                 }
             });
 
-            // Play/Pause buttons
-            ui.horizontal(|ui| {
-                if ui.button("Play").clicked() {
-                    self.paused = false;
-                }
-                if ui.button("Pause").clicked() {
-                    self.paused = true;
-                }
-            });
+            ui.separator();
 
-            // Preset management
-            ui.horizontal(|ui| {
-                if ui.button("Save Preset").clicked() {
-                    self.preset = self.synthesizer.lock().unwrap().save_preset();
-                }
-                if ui.button("Load Preset").clicked() {
-                    self.synthesizer.lock().unwrap().load_preset(&self.preset);
-                }
-            });
-
-            // Export to WAV button
-            if ui.button("Export to WAV").clicked() {
-                let synthesizer = self.synthesizer.lock().unwrap();
-                if let Err(err) = synthesizer.export_to_wav(5.0, "output.wav") {
-                    eprintln!("Failed to export audio: {}", err);
+            // Export Button
+            if ui.button("💾 Export Audio").clicked() {
+                if let Some(path) = FileDialog::new()
+                    .add_filter("WAV", &["wav"])
+                    .add_filter("MP3", &["mp3"])
+                    .add_filter("FLAC", &["flac"])
+                    .set_title("Export Audio")
+                    .save_file()
+                {
+                    let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or("");
+                    match extension {
+                        "wav" => {
+                            if let Err(e) = synth.export_to_wav(5.0, path.to_str().unwrap()) {
+                                eprintln!("Failed to export WAV: {}", e);
+                            }
+                        }
+                        "mp3" => {
+                            println!("MP3 export is not implemented yet.");
+                            // Add MP3 export logic here
+                        }
+                        "flac" => {
+                            println!("FLAC export is not implemented yet.");
+                            // Add FLAC export logic here
+                        }
+                        _ => eprintln!("Unsupported file format."),
+                    }
                 }
             }
 
-            // Enhanced waveform rendering
-            ui.horizontal(|ui| {
-                ui.label("Waveform Preview:");
-                let points: Vec<[f32; 2]> = (0..1000)
-                    .map(|i| {
-                        let t = i as f32 / 1000.0;
-                        [t, self.synthesizer.lock().unwrap().generate_sample(t, true)]
-                    })
-                    .collect();
-                let points: PlotPoints = PlotPoints::from(
-                    points.iter().map(|&[x, y]| [x as f64, y as f64]).collect::<Vec<_>>()
-                );
-                Plot::new("line_plot")
-                    .show(ui, |plot_ui| {
-                        plot_ui.line(Line::new(points));
-                    });
-            });
+            // Lock Spectrogram Button
+            if ui.button("🔒 Lock Spectrogram").clicked() {
+                println!("Spectrogram interaction locked.");
+            }
         });
     }
 }

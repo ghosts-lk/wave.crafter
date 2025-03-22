@@ -32,27 +32,13 @@ impl Synthesizer {
         } else {
             self.frequency_right
         };
+        let phase = 2.0 * PI * frequency * time;
         (match self.waveform {
-            Waveform::Sine => (2.0 * PI * frequency * time).sin(),
-            Waveform::Square => {
-                if (2.0 * PI * frequency * time).sin() >= 0.0 {
-                    1.0
-                } else {
-                    -1.0
-                }
-            }
-            Waveform::Triangle => {
-                2.0 * (2.0 * frequency * time - (2.0 * frequency * time).floor() - 0.5).abs() - 1.0
-            }
-            Waveform::Sawtooth => {
-                2.0 * (frequency * time - (frequency * time).floor()) - 1.0
-            }
+            Waveform::Sine => phase.sin(),
+            Waveform::Square => if phase.sin() >= 0.0 { 1.0 } else { -1.0 },
+            Waveform::Triangle => 2.0 * (2.0 * frequency * time - (2.0 * frequency * time).floor() - 0.5).abs() - 1.0,
+            Waveform::Sawtooth => 2.0 * (frequency * time - (frequency * time).floor()) - 1.0,
         }) * self.amplitude
-    }
-
-    pub fn set_frequency(&mut self, frequency: f32) {
-        self.frequency_left = frequency;
-        self.frequency_right = frequency;
     }
 
     pub fn set_amplitude(&mut self, amplitude: f32) {
@@ -89,11 +75,6 @@ impl Synthesizer {
         }
     }
 
-    pub fn max_amplitude(&self) -> f32 {
-        // Return the maximum amplitude value (adjust as needed)
-        1.0
-    }
-
     pub fn set_binaural_frequencies(&mut self, left: f32, right: f32) {
         self.frequency_left = left;
         self.frequency_right = right;
@@ -104,17 +85,24 @@ impl Synthesizer {
             channels: 2, // Stereo for binaural audio
             sample_rate: 44100,
             bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int, // Fix: Add missing field
         };
         let mut writer = hound::WavWriter::create(filename, spec)?;
         let sample_rate = spec.sample_rate as f32;
+        let max_amplitude = i16::MAX as f32;
         for i in 0..(duration * sample_rate) as usize {
             let time = i as f32 / sample_rate;
-            let left_sample = (self.generate_sample(time, true) * i16::MAX as f32) as i16;
-            let right_sample = (self.generate_sample(time, false) * i16::MAX as f32) as i16;
+            let left_sample = (self.generate_sample(time, true) * max_amplitude) as i16;
+            let right_sample = (self.generate_sample(time, false) * max_amplitude) as i16;
             writer.write_sample(left_sample)?;
             writer.write_sample(right_sample)?;
         }
         writer.finalize()?;
         Ok(())
+    }
+
+    pub fn play_audio(&self, duration: f32) {
+        println!("Playing audio for {} seconds...", duration);
+        // Integrate a real-time audio playback library like `rodio` or `cpal` here
     }
 }
